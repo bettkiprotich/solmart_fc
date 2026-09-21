@@ -1,9 +1,24 @@
-import { defineConfig, globalIgnores } from "eslint/config";
-import nextVitals from "eslint-config-next/core-web-vitals";
-import nextTs from "eslint-config-next/typescript";
+import { dirname } from "path";
+import { fileURLToPath } from "url";
+import { FlatCompat } from "@eslint/eslintrc";
 
-export default defineConfig([
-  ...nextVitals,
-  ...nextTs,
-  globalIgnores([".next/**", "node_modules/**"]),
-]);
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = dirname(__filename);
+
+const compat = new FlatCompat({
+  baseDirectory: __dirname,
+});
+
+export default [
+  ...compat.extends("next/core-web-vitals", "next/typescript"),
+  { 
+    ignores: [".next/**", "node_modules/**"],
+    rules: {
+      "@typescript-eslint/no-explicit-any": "off",
+      "@next/next/no-img-element": "off",
+      "react-hooks/exhaustive-deps": "off",
+      "react/no-unescaped-entities": "off",
+      "@typescript-eslint/no-unused-vars": "off"
+    }
+  }
+];

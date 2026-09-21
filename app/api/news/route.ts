@@ -4,7 +4,7 @@ import { requireRole } from "@/lib/auth/authorization";
 import { newsSchema } from "@/lib/validation/api";
 import { assertSameOrigin } from "@/lib/http/request";
 import { jsonError } from "@/lib/http/response";
-
+import { prisma } from "@/lib/db/prisma";
 export async function GET(request: Request) {
   const url = new URL(request.url);
   const category = url.searchParams.get("category") || undefined;

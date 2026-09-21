@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { z } from "zod";
 import { listMatches } from "@/lib/services/football";
+import { prisma } from "@/lib/db/prisma";
 import { requireRole } from "@/lib/auth/authorization";
 import { assertSameOrigin } from "@/lib/http/request";
 import { jsonError } from "@/lib/http/response";
