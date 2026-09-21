@@ -1,0 +1,5 @@
+import { NextResponse } from "next/server"; import { z } from "zod"; import { prisma } from "@/lib/db/prisma"; import { requireRole } from "@/lib/auth/authorization"; import { assertSameOrigin } from "@/lib/http/request"; import { jsonError } from "@/lib/http/response";
+const schema=z.object({key:z.string().min(1).max(160),value:z.string().max(10000),isPublic:z.boolean().default(true)});
+export async function GET(){const a=await requireRole("ADMIN");if(!a)return jsonError("Administrator access required.",403);return NextResponse.json({settings:await prisma.siteSetting.findMany({orderBy:{key:"asc"}})});}
+export async function POST(request:Request){const e=assertSameOrigin(request);if(e)return e;const a=await requireRole("ADMIN");if(!a)return jsonError("Administrator access required.",403);const p=schema.safeParse(await request.json());if(!p.success)return jsonError("Invalid setting.",422);return NextResponse.json({setting:await prisma.siteSetting.upsert({where:{key:p.data.key},create:p.data,update:{value:p.data.value,isPublic:p.data.isPublic}})},{status:201});}
+export async function PATCH(request:Request){return POST(request);}

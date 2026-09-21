@@ -1,0 +1,13 @@
+import fs from 'node:fs';
+import assert from 'node:assert/strict';
+const route = fs.readFileSync('app/api/orders/[id]/cancel/route.ts','utf8');
+const pay = fs.readFileSync('lib/services/paystack.ts','utf8');
+const charge = fs.readFileSync('app/api/payments/paystack/charge/route.ts','utf8');
+assert.match(route,/PENDING_PAYMENT/);
+assert.match(route,/CANCELLED/);
+assert.match(route,/payment.*PROCESSING/s);
+assert.match(pay,/PAYSTACK_API_ERROR/);
+assert.match(pay,/providerResponse/);
+assert.match(charge,/checkRateLimit/);
+assert.doesNotMatch(charge,/rateLimit\(/);
+console.log('Paystack diagnostic + customer cancel tests passed.');

@@ -1,0 +1,3 @@
+export default function TermsPage() {
+  return <section className="mx-auto max-w-4xl px-6 py-16"><p className="text-sm font-semibold uppercase tracking-[0.2em] text-red-500">Legal</p><h1 className="mt-3 text-4xl font-black">Terms of Use</h1><p className="mt-6 text-white/70">Use of the Solmart FC website is subject to applicable law and these terms. Product availability, pricing and delivery information may change. An order is not treated as paid until the payment provider and server-side order system confirm successful payment.</p><h2 className="mt-10 text-2xl font-bold">Website content</h2><p className="mt-3 text-white/70">Club news, fixtures, squad information and media may be updated as official information becomes available.</p></section>;
+}
