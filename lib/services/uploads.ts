@@ -1,5 +1,4 @@
-import { mkdir, writeFile, unlink } from "node:fs/promises";
-import path from "node:path";
+import { put, del } from "@vercel/blob";
 import { randomUUID } from "node:crypto";
 
 const MAX_IMAGE_BYTES = 8 * 1024 * 1024;
@@ -41,11 +40,9 @@ function isValidVideoSignature(type: string, data: Uint8Array) {
 }
 
 async function writeValidated(file: File, folder: string, extension: string) {
-  const dir = path.join(process.cwd(), "public", "uploads", folder);
-  await mkdir(dir, { recursive: true });
-  const filename = `${randomUUID()}.${extension}`;
-  await writeFile(path.join(dir, filename), Buffer.from(await file.arrayBuffer()), { flag: "wx" });
-  return `/uploads/${folder}/${filename}`;
+  const filename = `${folder}/${randomUUID()}.${extension}`;
+  const blob = await put(filename, file, { access: "public" });
+  return blob.url;
 }
 
 export async function saveImageUpload(file: File, folder: "players" | "products" | "galleries" | "teams") {
@@ -63,9 +60,6 @@ export async function saveVideoUpload(file: File) {
 }
 
 export async function removeUploadedFile(url: string) {
-  if (!url.startsWith("/uploads/")) return;
-  const root = path.resolve(process.cwd(), "public", "uploads");
-  const target = path.resolve(process.cwd(), "public", url.replace(/^\//, ""));
-  if (!target.startsWith(root + path.sep)) return;
-  try { await unlink(target); } catch {}
+  if (!url.includes("public.blob.vercel-storage.com")) return;
+  try { await del(url); } catch (e) { console.error("Error deleting blob:", e); }
 }
