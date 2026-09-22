@@ -22,8 +22,8 @@ export function SponsorsTab({ rows, mutate }: { rows: AnyRecord[]; mutate: any }
           }}
         >
           <input className={inputClass} placeholder="Sponsor name" required value={s.name} onChange={(e) => setS({ ...s, name: e.target.value })} />
-          <input className={inputClass} placeholder="Website URL" value={s.websiteUrl} onChange={(e) => setS({ ...s, websiteUrl: e.target.value })} />
-          <input className={inputClass} placeholder="Logo URL" value={s.logoUrl} onChange={(e) => setS({ ...s, logoUrl: e.target.value })} />
+          <input className={inputClass} type="url" placeholder="Website URL" value={s.websiteUrl} onChange={(e) => setS({ ...s, websiteUrl: e.target.value })} />
+          <input className={inputClass} type="url" placeholder="Logo URL" value={s.logoUrl} onChange={(e) => setS({ ...s, logoUrl: e.target.value })} />
           <input className={inputClass} placeholder="Description" value={s.description} onChange={(e) => setS({ ...s, description: e.target.value })} />
           <button className="rounded-xl bg-red-600 px-4 py-3 font-black text-white md:col-span-2">Add sponsor</button>
         </form>

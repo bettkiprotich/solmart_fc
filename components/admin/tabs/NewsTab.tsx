@@ -13,7 +13,7 @@ export function NewsTab({ rows, categories, mutate }: { rows: AnyRecord[]; categ
           onSubmit={async (e) => {
             e.preventDefault();
             try {
-              await mutate("/api/admin/news", "POST", draft);
+              await mutate("/api/admin/news", "POST", { ...draft, categoryId: draft.categoryId || null });
               toast.success("Article saved!");
               setDraft({ title: "", content: "", categoryId: "", status: "DRAFT", excerpt: "" });
             } catch (err) {
