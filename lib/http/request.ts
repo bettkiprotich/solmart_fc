@@ -4,15 +4,23 @@ const SAFE_METHODS = new Set(["GET", "HEAD", "OPTIONS"]);
 
 export function assertSameOrigin(request: Request) {
   if (SAFE_METHODS.has(request.method)) return null;
-  const appUrl = process.env.NEXT_PUBLIC_APP_URL;
-  if (!appUrl) return jsonError("Application origin is not configured.", 500);
 
   const origin = request.headers.get("origin");
   const referer = request.headers.get("referer");
+  
   try {
-    const expected = new URL(appUrl).origin;
     const supplied = origin || (referer ? new URL(referer).origin : null);
-    if (!supplied || supplied !== expected) return jsonError("Invalid request origin.", 403);
+    if (!supplied) return jsonError("Invalid request origin.", 403);
+    
+    const suppliedUrl = new URL(supplied);
+    const host = request.headers.get("x-forwarded-host") || request.headers.get("host");
+    
+    const appUrl = process.env.NEXT_PUBLIC_APP_URL;
+    const expectedFromEnv = appUrl ? new URL(appUrl).origin : null;
+
+    if (suppliedUrl.host !== host && supplied !== expectedFromEnv) {
+      return jsonError("Invalid request origin.", 403);
+    }
   } catch {
     return jsonError("Invalid request origin.", 403);
   }
