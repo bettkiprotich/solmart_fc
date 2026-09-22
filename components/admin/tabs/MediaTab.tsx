@@ -25,7 +25,7 @@ export function MediaTab({ galleries, videos, mutate }: { galleries: AnyRecord[]
     if (!selected || files.length === 0) return;
     try {
       const g = galleries.find((x) => x.id === selected);
-      let sortOrder = g?.images?.length || 0;
+      const sortOrder = g?.images?.length || 0;
       for (let i = 0; i < files.length; i++) {
         const url = await upload(files[i], "galleries");
         await api("/api/admin/gallery-images", {
