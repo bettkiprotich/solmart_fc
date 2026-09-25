@@ -4,7 +4,7 @@ import { toast } from "sonner";
 import Image from "next/image";
 
 export function SponsorsTab({ rows, mutate }: { rows: AnyRecord[]; mutate: any }) {
-  const blank = { name: "", websiteUrl: "", description: "", about: "", branches: "[]", active: true };
+  const blank = { name: "", websiteUrl: "", description: "", about: "", branches: [], type: "CLUB", active: true };
   const [s, setS] = useState(blank as any);
   const [file, setFile] = useState<File | null>(null);
   const [busy, setBusy] = useState(false);
@@ -12,7 +12,12 @@ export function SponsorsTab({ rows, mutate }: { rows: AnyRecord[]; mutate: any }
 
   const startEdit = (x: any) => {
     setEditing(x);
-    setS({ name: x.name, websiteUrl: x.websiteUrl || "", description: x.description || "", about: x.about || "", branches: JSON.stringify(x.branches || []), active: x.active });
+    let parsedBranches = [];
+    try {
+      if (typeof x.branches === "string") parsedBranches = JSON.parse(x.branches);
+      else if (Array.isArray(x.branches)) parsedBranches = x.branches;
+    } catch(e) {}
+    setS({ name: x.name, websiteUrl: x.websiteUrl || "", description: x.description || "", about: x.about || "", branches: parsedBranches, type: x.type || "CLUB", active: x.active });
     window.scrollTo({ top: 0, behavior: "smooth" });
   };
 
@@ -43,11 +48,7 @@ export function SponsorsTab({ rows, mutate }: { rows: AnyRecord[]; mutate: any }
             try {
               let logoUrl = editing?.logoUrl || null;
               if (file) logoUrl = await upload(file, "teams"); // Reuse "teams" folder for sponsor logos
-              let branchesData = [];
-              try {
-                branchesData = JSON.parse(s.branches);
-                if (!Array.isArray(branchesData)) branchesData = [];
-              } catch (err) {}
+              let branchesData = Array.isArray(s.branches) ? s.branches : [];
               await mutate(editing ? `/api/admin/sponsors?id=${editing.id}` : "/api/admin/sponsors", editing ? "PATCH" : "POST", { ...s, websiteUrl: s.websiteUrl || null, branches: branchesData, logoUrl });
               toast.success(editing ? "Sponsor updated!" : "Sponsor added!");
               setS(blank);
@@ -62,12 +63,35 @@ export function SponsorsTab({ rows, mutate }: { rows: AnyRecord[]; mutate: any }
         >
           <input className={inputClass} placeholder="Sponsor name" required value={s.name} onChange={(e) => setS({ ...s, name: e.target.value })} />
           <input className={inputClass} type="url" placeholder="Website URL" value={s.websiteUrl} onChange={(e) => setS({ ...s, websiteUrl: e.target.value })} />
-          <input className={inputClass + " md:col-span-2"} placeholder="Short Description (for banner)" value={s.description} onChange={(e) => setS({ ...s, description: e.target.value })} />
+          
+          <select className={inputClass} value={s.type || "CLUB"} onChange={(e) => setS({ ...s, type: e.target.value })}>
+            <option value="CLUB">Club Principal Partner (Top of Footer)</option>
+            <option value="TEAM">Team Sponsor (Below Principal)</option>
+          </select>
+          
+          <input className={inputClass} placeholder="Short Description (for banner)" value={s.description} onChange={(e) => setS({ ...s, description: e.target.value })} />
           <textarea className={inputClass + " md:col-span-2"} placeholder="About (Full text for sponsor page)" rows={3} value={s.about} onChange={(e) => setS({ ...s, about: e.target.value })} />
           
-          <div className="md:col-span-2">
-            <p className="text-xs font-bold text-black/50 mb-2">Branches (JSON array of maps embeds, e.g. [{`"name":"Branch 1", "embedHtml": "..."`}]):</p>
-            <textarea className={inputClass + " font-mono text-xs"} placeholder={`[\n  {\n    "name": "Branch 1",\n    "embedHtml": "<iframe..."\n  }\n]`} rows={4} value={s.branches} onChange={(e) => setS({ ...s, branches: e.target.value })} />
+          <div className="md:col-span-2 space-y-3">
+            <p className="text-xs font-bold text-black/50">Branches / Maps Embeds</p>
+            {Array.isArray(s.branches) && s.branches.map((b: any, i: number) => (
+              <div key={i} className="flex flex-col gap-2 p-3 border rounded-xl bg-zinc-50 relative">
+                <button type="button" onClick={() => setS({ ...s, branches: s.branches.filter((_:any, index:number) => index !== i) })} className="absolute top-2 right-2 text-red-500 hover:text-red-700 text-xs font-bold">Remove</button>
+                <input className={inputClass} placeholder="Branch Name (e.g. Mombasa Branch)" value={b.name} onChange={(e) => {
+                  const newBranches = [...s.branches];
+                  newBranches[i].name = e.target.value;
+                  setS({ ...s, branches: newBranches });
+                }} />
+                <textarea className={inputClass + " font-mono text-xs"} placeholder="<iframe src='...' ></iframe>" rows={2} value={b.embedHtml} onChange={(e) => {
+                  const newBranches = [...s.branches];
+                  newBranches[i].embedHtml = e.target.value;
+                  setS({ ...s, branches: newBranches });
+                }} />
+              </div>
+            ))}
+            <button type="button" onClick={() => setS({ ...s, branches: Array.isArray(s.branches) ? [...s.branches, { name: "", embedHtml: "" }] : [{ name: "", embedHtml: "" }] })} className="text-xs font-bold bg-neutral-200 hover:bg-neutral-300 px-3 py-2 rounded-lg">
+              + Add Branch
+            </button>
           </div>
 
           <label className="rounded-xl border-2 border-dashed border-black/10 p-4 text-sm font-bold md:col-span-2 block cursor-pointer">
