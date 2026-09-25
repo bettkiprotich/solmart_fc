@@ -48,7 +48,7 @@ export function SponsorsTab({ rows, mutate }: { rows: AnyRecord[]; mutate: any }
             try {
               let logoUrl = editing?.logoUrl || null;
               if (file) logoUrl = await upload(file, "teams"); // Reuse "teams" folder for sponsor logos
-              let branchesData = Array.isArray(s.branches) ? s.branches : [];
+              const branchesData = Array.isArray(s.branches) ? s.branches : [];
               await mutate(editing ? `/api/admin/sponsors?id=${editing.id}` : "/api/admin/sponsors", editing ? "PATCH" : "POST", { ...s, websiteUrl: s.websiteUrl || null, branches: branchesData, logoUrl });
               toast.success(editing ? "Sponsor updated!" : "Sponsor added!");
               setS(blank);

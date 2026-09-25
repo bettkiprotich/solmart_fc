@@ -19,7 +19,7 @@ export function TableTab({ data, refresh }: { data: { table?: (LeagueTable & { t
 
   // Auto-sync missing teams into the table state
   useEffect(() => {
-    let syncedRows = [...table];
+    const syncedRows = [...table];
     
     // For every competition, ensure its teams are in the table rows
     competitions.forEach(comp => {

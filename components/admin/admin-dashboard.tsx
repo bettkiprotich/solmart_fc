@@ -1,7 +1,7 @@
 "use client";
 import { useEffect, useState } from "react";
 import { Toaster, toast } from "sonner";
-import { Home, ShoppingCart, Package, Users, Shield, Trophy, ListOrdered, Swords, Activity, Newspaper, Image, Briefcase, FileText, Settings, MessageSquare } from "lucide-react";
+import { Home, ShoppingCart, Package, Users, Shield, Trophy, ListOrdered, Swords, Activity, Newspaper, Image as ImageIcon, Briefcase, FileText, Settings, MessageSquare } from "lucide-react";
 import { OverviewTab } from "./tabs/OverviewTab";
 import { OrdersTab } from "./tabs/OrdersTab";
 import { ProductsTab } from "./tabs/ProductsTab";
@@ -137,7 +137,7 @@ export function AdminDashboard({ admin }: { admin: AdminUser }) {
               Matches: <Swords size={18} />,
               Stats: <Activity size={18} />,
               News: <Newspaper size={18} />,
-              Media: <Image size={18} />,
+              Media: <ImageIcon size={18} />,
               Sponsors: <Briefcase size={18} />,
               Documents: <FileText size={18} />,
               Settings: <Settings size={18} />,
