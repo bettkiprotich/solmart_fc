@@ -4,7 +4,7 @@ import { toast } from "sonner";
 import Image from "next/image";
 
 export function MatchesTab({ rows, teams, competitions, mutate }: { rows: AnyRecord[]; teams: AnyRecord[]; competitions: AnyRecord[]; mutate: any }) {
-  const blank = { homeTeamName: "", awayTeamName: "", homeTeamLogoUrl: "", awayTeamLogoUrl: "", competitionName: "", kickoffAt: "", venue: "", status: "SCHEDULED", homeScore: "", awayScore: "", attendance: "", matchReport: "" };
+  const blank = { homeTeamName: "", awayTeamName: "", homeTeamLogoUrl: "", awayTeamLogoUrl: "", competitionName: "", type: "MATCH", kickoffAt: "", venue: "", status: "SCHEDULED", homeScore: "", awayScore: "", attendance: "", matchReport: "" };
   const [m, setM] = useState(blank);
   const [editing, setEditing] = useState<string | null>(null);
   const [uploading, setUploading] = useState<"home" | "away" | null>(null);
@@ -37,6 +37,7 @@ export function MatchesTab({ rows, teams, competitions, mutate }: { rows: AnyRec
       homeTeamLogoUrl: x.homeTeam?.logoUrl || "",
       awayTeamLogoUrl: x.awayTeam?.logoUrl || "",
       competitionName: x.competition?.name || "",
+      type: x.type || "MATCH",
       kickoffAt: new Date(x.kickoffAt).toISOString().slice(0, 16),
       venue: x.venue || "",
       status: x.status,
@@ -132,6 +133,11 @@ export function MatchesTab({ rows, teams, competitions, mutate }: { rows: AnyRec
               ))}
             </datalist>
           </div>
+          <select className={inputClass} value={m.type} onChange={(e) => setM({ ...m, type: e.target.value })}>
+            {["MATCH", "TRAINING"].map((s) => (
+              <option key={s}>{s}</option>
+            ))}
+          </select>
           <input className={inputClass} type="datetime-local" required value={m.kickoffAt} onChange={(e) => setM({ ...m, kickoffAt: e.target.value })} />
           <input className={inputClass} placeholder="Venue" value={m.venue} onChange={(e) => setM({ ...m, venue: e.target.value })} />
           <select className={inputClass} value={m.status} onChange={(e) => setM({ ...m, status: e.target.value })}>

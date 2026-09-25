@@ -11,9 +11,12 @@ import { MediaTab } from "./tabs/MediaTab";
 import { SponsorsTab } from "./tabs/SponsorsTab";
 import { SettingsTab, MessagesTab } from "./tabs/SettingsTab";
 import { UsersTab } from "./tabs/UsersTab";
+import { TeamsTab } from "./tabs/TeamsTab";
+import { DocumentsTab } from "./tabs/DocumentsTab";
+import { StatsTab } from "./tabs/StatsTab";
 import { api, AdminUser, OverviewMetrics, AnyRecord } from "./tabs/shared";
 
-const tabs = ["Overview", "Orders", "Products", "Players", "Matches", "News", "Media", "Sponsors", "Settings", "Messages", "Users"] as const;
+const tabs = ["Overview", "Orders", "Products", "Players", "Teams", "Matches", "Stats", "News", "Media", "Sponsors", "Documents", "Settings", "Messages", "Users"] as const;
 type Tab = typeof tabs[number];
 
 export function AdminDashboard({ admin }: { admin: AdminUser }) {
@@ -31,15 +34,27 @@ export function AdminDashboard({ admin }: { admin: AdminUser }) {
           Orders: "orders",
           Products: "products",
           Players: "players",
+          Teams: "teams",
           Matches: "matches",
+          Stats: "stats",
           News: "news",
           Media: "media",
           Sponsors: "sponsors",
+          Documents: "documents",
           Settings: "settings",
           Messages: "contact-messages",
           Users: "users",
         };
-        setData(await api(`/api/admin/${map[t]}`));
+        // Special case: Stats needs both stats and players data
+        if (t === "Stats") {
+          const [statsData, playersData] = await Promise.all([
+            api("/api/admin/stats"),
+            api("/api/admin/players")
+          ]);
+          setData({ stats: statsData.stats, players: playersData.players });
+        } else {
+          setData(await api(`/api/admin/${map[t]}`));
+        }
       }
     } catch (e) {
       toast.error(e instanceof Error ? e.message : "Unable to load data.");
@@ -116,14 +131,20 @@ export function AdminDashboard({ admin }: { admin: AdminUser }) {
             <ProductsTab rows={data.products || []} mutate={mutate} />
           ) : tab === "Players" ? (
             <PlayersTab rows={data.players || []} teams={data.teams || []} mutate={mutate} />
+          ) : tab === "Teams" ? (
+            <TeamsTab rows={data.teams || []} mutate={mutate} />
           ) : tab === "Matches" ? (
             <MatchesTab rows={data.matches || []} teams={data.teams || []} competitions={data.competitions || []} mutate={mutate} />
+          ) : tab === "Stats" ? (
+            <StatsTab rows={data.stats || []} players={data.players || []} mutate={mutate} />
           ) : tab === "News" ? (
             <NewsTab rows={data.articles || []} categories={data.categories || []} mutate={mutate} />
           ) : tab === "Media" ? (
             <MediaTab galleries={data.galleries || []} videos={data.videos || []} mutate={mutate} />
           ) : tab === "Sponsors" ? (
             <SponsorsTab rows={data.sponsors || []} mutate={mutate} />
+          ) : tab === "Documents" ? (
+            <DocumentsTab rows={data.documents || []} mutate={mutate} />
           ) : tab === "Settings" ? (
             <SettingsTab rows={data.settings || []} mutate={mutate} />
           ) : tab === "Messages" ? (
