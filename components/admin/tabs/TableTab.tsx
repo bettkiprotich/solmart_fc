@@ -1,18 +1,28 @@
 "use client";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { api } from "./shared";
 import { LeagueTable, Team, Competition } from "@prisma/client";
 import { toast } from "sonner";
 import { Save } from "lucide-react";
 
-export function TableTab({ data, refresh }: { data: { table: (LeagueTable & { team: Team, competition: Competition })[], competitions: Competition[], teams: Team[] }, refresh: () => void }) {
+export function TableTab({ data, refresh }: { data: { table?: (LeagueTable & { team: Team, competition: Competition })[], competitions?: Competition[], teams?: Team[] }, refresh: () => void }) {
   const [saving, setSaving] = useState(false);
   
-  // Group table rows by competition
-  const competitionsWithTable = data.competitions.filter(c => data.table.some(t => t.competitionId === c.id));
-  const [selectedCompId, setSelectedCompId] = useState(competitionsWithTable[0]?.id || data.competitions[0]?.id);
+  const competitions = data?.competitions || [];
+  const table = data?.table || [];
 
-  const [rows, setRows] = useState(data.table);
+  // Group table rows by competition
+  const competitionsWithTable = competitions.filter(c => table.some(t => t.competitionId === c.id));
+  const [selectedCompId, setSelectedCompId] = useState(competitionsWithTable[0]?.id || competitions[0]?.id);
+
+  const [rows, setRows] = useState(table);
+
+  useEffect(() => {
+    setRows(table);
+    if (!selectedCompId) {
+      setSelectedCompId(competitionsWithTable[0]?.id || competitions[0]?.id);
+    }
+  }, [data]);
 
   const compRows = rows.filter(r => r.competitionId === selectedCompId).sort((a, b) => a.position - b.position);
 
@@ -43,7 +53,7 @@ export function TableTab({ data, refresh }: { data: { table: (LeagueTable & { te
             value={selectedCompId} 
             onChange={(e) => setSelectedCompId(e.target.value)}
           >
-            {data.competitions.map(c => (
+            {competitions.map(c => (
               <option key={c.id} value={c.id}>{c.name}</option>
             ))}
           </select>
