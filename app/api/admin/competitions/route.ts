@@ -14,7 +14,7 @@ export async function POST(request: Request) {
     const { name, season, isLeague, showOnHomepage, showOnTeamPage, teamIds } = await request.json();
     const slug = name.toLowerCase().replace(/[^a-z0-9]+/g, '-') + '-' + Date.now();
     
-    await prisma.competition.create({
+    const comp = await prisma.competition.create({
       data: {
         name,
         slug,
@@ -27,6 +27,17 @@ export async function POST(request: Request) {
         }
       }
     });
+
+    if (teamIds && teamIds.length > 0) {
+      await prisma.leagueTable.createMany({
+        data: teamIds.map((tid: string, i: number) => ({
+          competitionId: comp.id,
+          teamId: tid,
+          position: i + 1,
+          isDemoData: false
+        }))
+      });
+    }
     
     return NextResponse.json({ success: true });
   } catch (error) {
@@ -38,8 +49,6 @@ export async function PUT(request: Request) {
   try {
     const { id, name, season, isLeague, showOnHomepage, showOnTeamPage, teamIds } = await request.json();
     
-    // First, disconnect all teams, then connect the new ones
-    // Or just use set
     await prisma.competition.update({
       where: { id },
       data: {
@@ -53,6 +62,35 @@ export async function PUT(request: Request) {
         }
       }
     });
+
+    // Clean up removed teams from the league table
+    await prisma.leagueTable.deleteMany({
+      where: {
+        competitionId: id,
+        teamId: { notIn: teamIds }
+      }
+    });
+
+    // Auto-create league table entries for new teams
+    for (const tid of teamIds) {
+      const existing = await prisma.leagueTable.findUnique({
+        where: { competitionId_teamId: { competitionId: id, teamId: tid } }
+      });
+      if (!existing) {
+        const maxPos = await prisma.leagueTable.aggregate({
+          where: { competitionId: id },
+          _max: { position: true }
+        });
+        await prisma.leagueTable.create({
+          data: {
+            competitionId: id,
+            teamId: tid,
+            position: (maxPos._max.position || 0) + 1,
+            isDemoData: false
+          }
+        });
+      }
+    }
     
     return NextResponse.json({ success: true });
   } catch (error) {

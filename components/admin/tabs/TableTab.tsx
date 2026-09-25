@@ -12,13 +12,38 @@ export function TableTab({ data, refresh }: { data: { table?: (LeagueTable & { t
   const table = data?.table || [];
 
   // Group table rows by competition
-  const competitionsWithTable = competitions.filter(c => table.some(t => t.competitionId === c.id));
+  const competitionsWithTable = competitions.filter(c => c.teams && c.teams.length > 0);
   const [selectedCompId, setSelectedCompId] = useState(competitionsWithTable[0]?.id || competitions[0]?.id);
 
   const [rows, setRows] = useState(table);
 
+  // Auto-sync missing teams into the table state
   useEffect(() => {
-    setRows(table);
+    let syncedRows = [...table];
+    
+    // For every competition, ensure its teams are in the table rows
+    competitions.forEach(comp => {
+      if (!comp.teams) return;
+      const compRows = syncedRows.filter(r => r.competitionId === comp.id);
+      const existingTeamIds = new Set(compRows.map(r => r.teamId));
+      
+      const missing = comp.teams.filter(t => !existingTeamIds.has(t.id));
+      if (missing.length > 0) {
+        missing.forEach(team => {
+          syncedRows.push({
+            id: `new-${comp.id}-${team.id}`,
+            competitionId: comp.id,
+            teamId: team.id,
+            team,
+            position: compRows.length + 1,
+            played: 0, wins: 0, draws: 0, losses: 0, goalsFor: 0, goalsAgainst: 0, points: 0,
+          } as any);
+        });
+      }
+    });
+
+    setRows(syncedRows);
+
     if (!selectedCompId) {
       setSelectedCompId(competitionsWithTable[0]?.id || competitions[0]?.id);
     }
@@ -26,24 +51,6 @@ export function TableTab({ data, refresh }: { data: { table?: (LeagueTable & { t
 
   const compRows = rows.filter(r => r.competitionId === selectedCompId).sort((a, b) => a.position - b.position);
   
-  const selectedComp = competitions.find(c => c.id === selectedCompId);
-  const teamsInTable = compRows.map(r => r.teamId);
-  const missingTeams = selectedComp?.teams?.filter((t: Team) => !teamsInTable.includes(t.id)) || [];
-
-  const addRow = (teamId: string) => {
-    const team = missingTeams.find((t: Team) => t.id === teamId);
-    if (!team) return;
-    const newRow = {
-      id: `new-${Date.now()}`,
-      competitionId: selectedCompId,
-      teamId,
-      team,
-      position: compRows.length + 1,
-      played: 0, wins: 0, draws: 0, losses: 0, goalsFor: 0, goalsAgainst: 0, points: 0,
-    } as any;
-    setRows([...rows, newRow]);
-  };
-
   const updateRow = (id: string, field: string, value: string | number) => {
     setRows(prev => prev.map(r => r.id === id ? { ...r, [field]: value } : r));
   };
