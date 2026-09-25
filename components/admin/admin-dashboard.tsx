@@ -14,9 +14,10 @@ import { UsersTab } from "./tabs/UsersTab";
 import { TeamsTab } from "./tabs/TeamsTab";
 import { DocumentsTab } from "./tabs/DocumentsTab";
 import { StatsTab } from "./tabs/StatsTab";
+import { TableTab } from "./tabs/TableTab";
 import { api, AdminUser, OverviewMetrics, AnyRecord } from "./tabs/shared";
 
-const tabs = ["Overview", "Orders", "Products", "Players", "Teams", "Matches", "Stats", "News", "Media", "Sponsors", "Documents", "Settings", "Messages", "Users"] as const;
+const tabs = ["Overview", "Orders", "Products", "Players", "Teams", "Table", "Matches", "Stats", "News", "Media", "Sponsors", "Documents", "Settings", "Messages", "Users"] as const;
 type Tab = typeof tabs[number];
 
 export function AdminDashboard({ admin }: { admin: AdminUser }) {
@@ -35,6 +36,7 @@ export function AdminDashboard({ admin }: { admin: AdminUser }) {
           Products: "products",
           Players: "players",
           Teams: "teams",
+          Table: "league-table",
           Matches: "matches",
           Stats: "stats",
           News: "news",
@@ -133,6 +135,8 @@ export function AdminDashboard({ admin }: { admin: AdminUser }) {
             <PlayersTab rows={data.players || []} teams={data.teams || []} mutate={mutate} />
           ) : tab === "Teams" ? (
             <TeamsTab rows={data.teams || []} mutate={mutate} />
+          ) : tab === "Table" ? (
+            <TableTab data={data as any} refresh={load} />
           ) : tab === "Matches" ? (
             <MatchesTab rows={data.matches || []} teams={data.teams || []} competitions={data.competitions || []} mutate={mutate} />
           ) : tab === "Stats" ? (

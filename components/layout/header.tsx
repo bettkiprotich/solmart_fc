@@ -7,7 +7,7 @@ import { useEffect, useState } from "react";
 const navItems = [
   ["Home", "/"],
   ["Club", "/club"],
-  ["Team", "/team"],
+  ["Team", "/teams"],
   ["Matches", "/matches"],
   ["News", "/news"],
   ["Media", "/media"],
