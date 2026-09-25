@@ -4,14 +4,16 @@ import Image from "next/image";
 import Link from "next/link";
 import { Metadata } from "next";
 
-export async function generateMetadata({ params }: { params: { id: string } }): Promise<Metadata> {
-  const sponsor = await prisma.sponsor.findUnique({ where: { id: params.id } });
+export async function generateMetadata({ params }: { params: Promise<{ id: string }> }): Promise<Metadata> {
+  const { id } = await params;
+  const sponsor = await prisma.sponsor.findUnique({ where: { id } });
   if (!sponsor) return { title: "Sponsor Not Found" };
   return { title: `${sponsor.name} - Solmart FC` };
 }
 
-export default async function SponsorPage({ params }: { params: { id: string } }) {
-  const sponsor = await prisma.sponsor.findUnique({ where: { id: params.id } });
+export default async function SponsorPage({ params }: { params: Promise<{ id: string }> }) {
+  const { id } = await params;
+  const sponsor = await prisma.sponsor.findUnique({ where: { id } });
   if (!sponsor) return notFound();
 
   // Parse branches safely
@@ -96,3 +98,4 @@ export default async function SponsorPage({ params }: { params: { id: string } }
     </div>
   );
 }
+
