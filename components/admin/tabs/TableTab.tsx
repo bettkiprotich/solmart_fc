@@ -122,17 +122,6 @@ export function TableTab({ data, refresh }: { data: { table?: (LeagueTable & { t
             )}
           </tbody>
         </table>
-        {missingTeams.length > 0 && (
-          <div className="p-4 border-t bg-zinc-50 flex items-center gap-4">
-            <span className="text-sm font-bold text-black/50">Add participating team to table:</span>
-            <select className="border rounded p-2 text-sm" onChange={(e) => { if(e.target.value) addRow(e.target.value); e.target.value = ""; }} defaultValue="">
-              <option value="" disabled>Select team...</option>
-              {missingTeams.map((t: Team) => (
-                <option key={t.id} value={t.id}>{t.name}</option>
-              ))}
-            </select>
-          </div>
-        )}
       </div>
     </div>
   );
