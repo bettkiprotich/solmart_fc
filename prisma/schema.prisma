@@ -153,6 +153,7 @@ model Team {
   homeMatches   Fixture[]      @relation("HomeTeam")
   awayMatches   Fixture[]      @relation("AwayTeam")
   tableRows     LeagueTable[]
+  competitions  Competition[]  @relation("CompetitionTeams")
   createdAt     DateTime       @default(now())
   updatedAt     DateTime       @updatedAt
 }
@@ -227,6 +228,10 @@ model Competition {
   description String?
   fixtures    Fixture[]
   tableRows   LeagueTable[]
+  teams          Team[]         @relation("CompetitionTeams")
+  isLeague       Boolean        @default(true)
+  showOnHomepage Boolean        @default(false)
+  showOnTeamPage Boolean        @default(false)
   createdAt   DateTime     @default(now())
   updatedAt   DateTime     @updatedAt
 }

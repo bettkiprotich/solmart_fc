@@ -15,9 +15,10 @@ import { TeamsTab } from "./tabs/TeamsTab";
 import { DocumentsTab } from "./tabs/DocumentsTab";
 import { StatsTab } from "./tabs/StatsTab";
 import { TableTab } from "./tabs/TableTab";
+import { CompetitionsTab } from "./tabs/CompetitionsTab";
 import { api, AdminUser, OverviewMetrics, AnyRecord } from "./tabs/shared";
 
-const tabs = ["Overview", "Orders", "Products", "Players", "Teams", "Table", "Matches", "Stats", "News", "Media", "Sponsors", "Documents", "Settings", "Messages", "Users"] as const;
+const tabs = ["Overview", "Orders", "Products", "Players", "Teams", "Tournaments", "Table", "Matches", "Stats", "News", "Media", "Sponsors", "Documents", "Settings", "Messages", "Users"] as const;
 type Tab = typeof tabs[number];
 
 export function AdminDashboard({ admin }: { admin: AdminUser }) {
@@ -36,6 +37,7 @@ export function AdminDashboard({ admin }: { admin: AdminUser }) {
           Products: "products",
           Players: "players",
           Teams: "teams",
+          Tournaments: "competitions",
           Table: "league-table",
           Matches: "matches",
           Stats: "stats",
@@ -47,13 +49,19 @@ export function AdminDashboard({ admin }: { admin: AdminUser }) {
           Messages: "contact-messages",
           Users: "users",
         };
-        // Special case: Stats needs both stats and players data
+        // Special cases
         if (t === "Stats") {
           const [statsData, playersData] = await Promise.all([
             api("/api/admin/stats"),
             api("/api/admin/players")
           ]);
           setData({ stats: statsData.stats, players: playersData.players });
+        } else if (t === "Tournaments" || t === "Teams") {
+          const [compsData, teamsData] = await Promise.all([
+            api("/api/admin/competitions"),
+            api("/api/admin/teams")
+          ]);
+          setData({ competitions: compsData.competitions, teams: teamsData.teams });
         } else {
           setData(await api(`/api/admin/${map[t]}`));
         }
@@ -134,7 +142,9 @@ export function AdminDashboard({ admin }: { admin: AdminUser }) {
           ) : tab === "Players" ? (
             <PlayersTab rows={data.players || []} teams={data.teams || []} mutate={mutate} />
           ) : tab === "Teams" ? (
-            <TeamsTab rows={data.teams || []} mutate={mutate} />
+            <TeamsTab rows={data.teams || []} competitions={data.competitions || []} mutate={mutate} />
+          ) : tab === "Tournaments" ? (
+            <CompetitionsTab rows={data.competitions || []} teams={data.teams || []} mutate={mutate} />
           ) : tab === "Table" ? (
             <TableTab data={data as any} refresh={load} />
           ) : tab === "Matches" ? (

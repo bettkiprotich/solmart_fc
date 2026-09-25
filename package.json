@@ -16,6 +16,7 @@
     "db:seed": "tsx prisma/seed.ts"
   },
   "dependencies": {
+    "@babel/parser": "^7.29.9",
     "@heroicons/react": "^2.2.0",
     "@prisma/client": "^6.15.0",
     "@vercel/blob": "^2.8.0",

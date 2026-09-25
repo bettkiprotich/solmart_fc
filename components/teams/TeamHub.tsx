@@ -12,14 +12,14 @@ type TeamData = Team & {
   tableRows: (LeagueTable & { competition: any })[];
 };
 
-export function TeamHub({ team }: { team: TeamData }) {
+export function TeamHub({ team, fullTable = [] }: { team: TeamData, fullTable?: any[] }) {
   const [tab, setTab] = useState<"OVERVIEW" | "MATCHES" | "TABLE" | "SQUAD" | "STATS" | "REPORTS">("OVERVIEW");
   const [season, setSeason] = useState("2025/26");
 
   const tabs = ["OVERVIEW", "MATCHES", "TABLE", "SQUAD", "STATS", "REPORTS"] as const;
 
   const matches = [...team.homeMatches, ...team.awayMatches]
-    .sort((a, b) => new Date(a.kickoffAt).getTime() - new Date(b.kickoffAt).getTime());
+    .sort((a, b) => new Date(a.kickoffAt).getTime() - new Date(b.kickoffAt).getTime()) as any[];
     
   const upcomingMatches = matches.filter(m => new Date(m.kickoffAt) >= new Date() && m.type !== "TRAINING").slice(0, 3);
   const recentMatches = matches.filter(m => new Date(m.kickoffAt) < new Date() && m.type !== "TRAINING").reverse().slice(0, 3);
@@ -135,14 +135,45 @@ export function TeamHub({ team }: { team: TeamData }) {
               <div className="rounded-3xl bg-white p-6 shadow-sm ring-1 ring-black/5">
                 <h3 className="text-sm text-black/50 font-black uppercase tracking-widest mb-4">Upcoming Matches</h3>
                 <div className="space-y-3">
-                  {upcomingMatches.length === 0 ? <p className="text-sm text-black/50">No upcoming matches scheduled.</p> : upcomingMatches.map(m => (
+                  {upcomingMatches.length === 0 ? <p className="text-sm text-black/50">No upcoming matches scheduled.</p> : upcomingMatches.map((m: any) => (
                      <div key={m.id} className="text-sm border-b pb-3 last:border-0 last:pb-0">
-                       <div className="font-bold">{m.homeTeamId === team.id ? team.name : m.homeTeam.name} vs {m.awayTeamId === team.id ? team.name : m.awayTeam.name}</div>
+                       <div className="font-bold">{m.homeTeamId === team.id ? team.name : m.homeTeam?.name || m.homeTeamId} vs {m.awayTeamId === team.id ? team.name : m.awayTeam?.name || m.awayTeamId}</div>
                        <div className="text-black/50 mt-1">{new Date(m.kickoffAt).toLocaleString()}</div>
                      </div>
                   ))}
                 </div>
               </div>
+
+              {fullTable.length > 0 && (
+                <div className="rounded-3xl bg-white shadow-sm ring-1 ring-black/5 overflow-hidden">
+                  <div className="bg-black text-white p-4 text-center text-sm font-bold uppercase tracking-widest">
+                    League Position
+                  </div>
+                  <table className="w-full text-sm">
+                    <thead>
+                      <tr className="bg-zinc-50 text-black/50 text-left border-b">
+                        <th className="py-2 pl-4">Pos</th>
+                        <th className="py-2">Team</th>
+                        <th className="py-2 text-center">P</th>
+                        <th className="py-2 pr-4 text-right">Pts</th>
+                      </tr>
+                    </thead>
+                    <tbody className="divide-y">
+                      {fullTable.slice(0, 5).map((row) => (
+                        <tr key={row.id} className={row.teamId === team.id ? "bg-red-50/50" : ""}>
+                          <td className="py-3 pl-4 font-bold text-black/50">{row.position}</td>
+                          <td className="py-3 font-bold truncate max-w-[100px]" title={row.team.name}>{row.team.name}</td>
+                          <td className="py-3 text-center">{row.played}</td>
+                          <td className="py-3 pr-4 text-right font-black">{row.points}</td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                  <div className="p-3 bg-zinc-50 text-center border-t cursor-pointer" onClick={() => setTab("TABLE")}>
+                    <span className="text-xs font-bold uppercase tracking-widest text-red-600 hover:text-red-700">View Full Table →</span>
+                  </div>
+                </div>
+              )}
             </div>
           </div>
         )}
@@ -257,7 +288,8 @@ export function TeamHub({ team }: { team: TeamData }) {
                 </table>
               </div>
             </div>
-
+          </div>
+        )}
 
         {/* SQUAD TAB */}
         {tab === "SQUAD" && (
@@ -320,7 +352,7 @@ export function TeamHub({ team }: { team: TeamData }) {
         {/* TABLE TAB */}
         {tab === "TABLE" && (
           <div className="max-w-4xl mx-auto rounded-3xl bg-white shadow-sm ring-1 ring-black/5 overflow-hidden">
-             {team.tableRows.length === 0 ? <div className="p-8 text-black/50">No table data available.</div> : (
+             {fullTable.length === 0 ? <div className="p-8 text-black/50">No table data available.</div> : (
                <div className="overflow-x-auto">
                   <table className="w-full text-left text-sm whitespace-nowrap">
                     <thead className="bg-zinc-50 border-b">
@@ -336,10 +368,10 @@ export function TeamHub({ team }: { team: TeamData }) {
                       </tr>
                     </thead>
                     <tbody className="divide-y text-sm font-medium">
-                      {team.tableRows.map(r => (
-                        <tr key={r.id} className="bg-red-50/50">
+                      {fullTable.map(r => (
+                        <tr key={r.id} className={r.teamId === team.id ? "bg-red-50/50" : "hover:bg-zinc-50 transition-colors"}>
                           <td className="px-6 py-4 font-black">{r.position}</td>
-                          <td className="px-4 py-4 font-bold">{team.name}</td>
+                          <td className="px-4 py-4 font-bold">{r.team?.name || r.teamId}</td>
                           <td className="px-4 py-4 text-center">{r.played}</td>
                           <td className="px-4 py-4 text-center">{r.wins}</td>
                           <td className="px-4 py-4 text-center">{r.draws}</td>

@@ -27,6 +27,7 @@ export default async function TeamPage({ params }: { params: Promise<{ slug: str
         include: { homeTeam: true, competition: true },
       },
       tableRows: {
+        where: { competition: { showOnTeamPage: true } },
         include: { competition: true }
       }
     }
@@ -34,5 +35,14 @@ export default async function TeamPage({ params }: { params: Promise<{ slug: str
 
   if (!team) return notFound();
 
-  return <TeamHub team={team as any} />;
+  let fullTable: any[] = [];
+  if (team.tableRows.length > 0) {
+    fullTable = await prisma.leagueTable.findMany({
+      where: { competitionId: team.tableRows[0].competitionId },
+      include: { team: true, competition: true },
+      orderBy: { position: "asc" }
+    });
+  }
+
+  return <TeamHub team={team as any} fullTable={fullTable} />;
 }

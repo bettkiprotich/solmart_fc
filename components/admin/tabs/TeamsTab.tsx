@@ -3,9 +3,11 @@ import { AnyRecord, cardClass, inputClass, upload } from "./shared";
 import { toast } from "sonner";
 import Image from "next/image";
 
-export function TeamsTab({ rows, mutate }: { rows: AnyRecord[]; mutate: any }) {
-  const blank = { name: "", shortName: "", blurb: "" };
-  const [t, setT] = useState(blank);
+import { Competition } from "@prisma/client";
+
+export function TeamsTab({ rows, competitions, mutate }: { rows: AnyRecord[]; competitions: Competition[]; mutate: any }) {
+  const blank = { name: "", shortName: "", blurb: "", competitionIds: [] as string[] };
+  const [t, setT] = useState(blank as any);
   const [editing, setEditing] = useState<AnyRecord | null>(null);
   const [logoFile, setLogoFile] = useState<File | null>(null);
   const [coverFile, setCoverFile] = useState<File | null>(null);
@@ -34,7 +36,7 @@ export function TeamsTab({ rows, mutate }: { rows: AnyRecord[]; mutate: any }) {
 
   const startEdit = (x: any) => {
     setEditing(x);
-    setT({ name: x.name, shortName: x.shortName || "", blurb: x.blurb || "" });
+    setT({ name: x.name, shortName: x.shortName || "", blurb: x.blurb || "", competitionIds: x.competitions?.map((c: any) => c.id) || [] });
     setLogoFile(null);
     setCoverFile(null);
     window.scrollTo({ top: 0, behavior: "smooth" });
@@ -57,6 +59,29 @@ export function TeamsTab({ rows, mutate }: { rows: AnyRecord[]; mutate: any }) {
             Cover Photo
             <input className="mt-2 block w-full text-sm" type="file" accept="image/*" onChange={(e) => setCoverFile(e.target.files?.[0] || null)} />
           </label>
+
+
+          <div className="md:col-span-2 rounded-xl border p-4 bg-zinc-50">
+            <label className="text-sm font-bold block mb-2">Participating Tournaments</label>
+            <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-2">
+              {competitions.map(c => (
+                <label key={c.id} className="flex items-center gap-2 cursor-pointer text-sm">
+                  <input
+                    type="checkbox"
+                    checked={t.competitionIds?.includes(c.id)}
+                    onChange={(e) => {
+                      if (e.target.checked) {
+                        setT({ ...t, competitionIds: [...(t.competitionIds || []), c.id] });
+                      } else {
+                        setT({ ...t, competitionIds: (t.competitionIds || []).filter((id: string) => id !== c.id) });
+                      }
+                    }}
+                  />
+                  {c.name}
+                </label>
+              ))}
+            </div>
+          </div>
 
           <div className="flex gap-2 md:col-span-2">
             <button disabled={busy} className="rounded-xl bg-red-600 px-4 py-3 font-black text-white disabled:opacity-50">
