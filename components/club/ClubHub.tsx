@@ -15,7 +15,7 @@ export function ClubHub({ documents, sponsors }: { documents: Document[]; sponso
     <div>
       <div className="bg-black text-white py-12 md:py-20 text-center">
          <h1 className="text-3xl md:text-5xl font-black uppercase tracking-tight">Club Information</h1>
-         <p className="mt-4 text-white/50 max-w-2xl mx-auto px-4 text-lg">Everything you need to know about Kahawa Pride FC.</p>
+         <p className="mt-4 text-white/50 max-w-2xl mx-auto px-4 text-lg">Everything you need to know about Solmart FC.</p>
       </div>
 
       <div className="bg-white border-b sticky top-0 z-10 shadow-sm">
@@ -37,8 +37,8 @@ export function ClubHub({ documents, sponsors }: { documents: Document[]; sponso
       <div className="mx-auto max-w-4xl px-4 py-12 md:py-16 min-h-[50vh]">
          {tab === "INFO" && (
            <div className="prose prose-sm md:prose-base max-w-none text-black/70">
-             <h2>About Kahawa Pride FC</h2>
-             <p>Kahawa Pride FC is a community-driven football club dedicated to excellence on and off the pitch. Founded with a vision to nurture local talent and provide a professional platform for aspiring players, our club has grown into a beacon of sporting achievement in the region.</p>
+             <h2>About Solmart FC</h2>
+             <p>Solmart FC is a community-driven football club dedicated to excellence on and off the pitch. Founded with a vision to nurture local talent and provide a professional platform for aspiring players, our club has grown into a beacon of sporting achievement in the region.</p>
              <p>Our core values are integrity, hard work, and community. We believe in developing not just great footballers, but great individuals who contribute positively to society.</p>
            </div>
          )}

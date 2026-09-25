@@ -2,7 +2,7 @@ import { prisma } from "@/lib/db/prisma";
 import { ClubHub } from "@/components/club/ClubHub";
 
 export const metadata = {
-  title: "Club Information | Kahawa Pride FC",
+  title: "Club Information | Solmart FC",
 };
 
 export default async function ClubPage() {

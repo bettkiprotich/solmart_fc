@@ -3,7 +3,7 @@ import Image from "next/image";
 import Link from "next/link";
 
 export const metadata = {
-  title: "Teams | Kahawa Pride FC",
+  title: "Teams | Solmart FC",
 };
 
 export default async function TeamsPage() {

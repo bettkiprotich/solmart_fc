@@ -4,7 +4,7 @@ import Link from "next/link";
 import { PlayCircleIcon, PhotoIcon } from "@heroicons/react/24/outline";
 
 export const metadata = {
-  title: "Media Gallery | Kahawa Pride FC",
+  title: "Media Gallery | Solmart FC",
 };
 
 export default async function MediaPage() {

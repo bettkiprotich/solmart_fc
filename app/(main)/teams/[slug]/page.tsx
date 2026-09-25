@@ -5,7 +5,7 @@ import { TeamHub } from "@/components/teams/TeamHub";
 export async function generateMetadata({ params }: { params: Promise<{ slug: string }> }) {
   const { slug } = await params;
   const team = await prisma.team.findUnique({ where: { slug } });
-  return { title: team ? `${team.name} | Kahawa Pride FC` : "Team Not Found" };
+  return { title: team ? `${team.name} | Solmart FC` : "Team Not Found" };
 }
 
 export default async function TeamPage({ params }: { params: Promise<{ slug: string }> }) {

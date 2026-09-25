@@ -59,11 +59,11 @@ export async function Footer() {
         <div>
           <div className="flex items-center gap-3">
             <div className="relative size-11 overflow-hidden rounded-full bg-white">
-              <Image src="/images/solmart-fc-logo.png" alt="Kahawa Pride FC crest" fill sizes="44px" className="object-cover" />
+              <Image src="/images/solmart-fc-logo.png" alt="Solmart FC crest" fill sizes="44px" className="object-cover" />
             </div>
-            <p className="text-lg font-black uppercase">Kahawa Pride FC</p>
+            <p className="text-lg font-black uppercase">Solmart FC</p>
           </div>
-          <p className="mt-4 text-sm leading-6 text-white/55">Official digital home of Kahawa Pride FC, Nairobi, Kenya.</p>
+          <p className="mt-4 text-sm leading-6 text-white/55">Official digital home of Solmart FC, Nairobi, Kenya.</p>
         </div>
         
         <div>
@@ -98,7 +98,7 @@ export async function Footer() {
             <div className="h-8 px-3 rounded bg-white/10 flex items-center justify-center font-bold text-[10px] text-white/70">
               AFFILIATED WITH FKF
             </div>
-            <span>© {new Date().getFullYear()} Kahawa Pride FC. All rights reserved.</span>
+            <span>© {new Date().getFullYear()} Solmart FC. All rights reserved.</span>
           </div>
           
           <div className="flex flex-wrap gap-4 font-bold">

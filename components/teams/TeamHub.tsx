@@ -13,10 +13,10 @@ type TeamData = Team & {
 };
 
 export function TeamHub({ team }: { team: TeamData }) {
-  const [tab, setTab] = useState<"OVERVIEW" | "MATCHES" | "TABLE" | "SQUAD" | "STATS">("OVERVIEW");
+  const [tab, setTab] = useState<"OVERVIEW" | "MATCHES" | "TABLE" | "SQUAD" | "STATS" | "REPORTS">("OVERVIEW");
   const [season, setSeason] = useState("2025/26");
 
-  const tabs = ["OVERVIEW", "MATCHES", "TABLE", "SQUAD", "STATS"] as const;
+  const tabs = ["OVERVIEW", "MATCHES", "TABLE", "SQUAD", "STATS", "REPORTS"] as const;
 
   const matches = [...team.homeMatches, ...team.awayMatches]
     .sort((a, b) => new Date(a.kickoffAt).getTime() - new Date(b.kickoffAt).getTime());
@@ -352,6 +352,30 @@ export function TeamHub({ team }: { team: TeamData }) {
                   </table>
                </div>
              )}
+          </div>
+        )}
+
+        {/* REPORTS TAB */}
+        {tab === "REPORTS" && (
+          <div className="space-y-4 max-w-4xl mx-auto">
+            {matches.filter(m => m.matchReport).length === 0 ? <p className="text-black/50">No match reports available.</p> : matches.filter(m => m.matchReport).reverse().map(m => (
+              <Link href={`/matches/${m.id}`} key={m.id} className="block rounded-3xl bg-white p-6 shadow-sm ring-1 ring-black/5 hover:bg-zinc-50 transition-colors">
+                <div className="text-xs font-bold tracking-widest text-black/40 uppercase mb-2">
+                  {new Date(m.kickoffAt).toLocaleDateString(undefined, { year: 'numeric', month: 'long', day: 'numeric' })}
+                  <span className="mx-2">·</span>
+                  {m.competition?.name || "Friendly"}
+                </div>
+                <h3 className="font-black text-xl mb-4 text-black">
+                  {m.homeTeamId === team.id ? team.name : m.homeTeam.name} {m.homeScore} - {m.awayScore} {m.awayTeamId === team.id ? team.name : m.awayTeam.name}
+                </h3>
+                <div className="prose prose-sm max-w-none text-black/60 line-clamp-3">
+                  {m.matchReport}
+                </div>
+                <div className="mt-4 text-red-600 font-bold uppercase text-xs tracking-widest">
+                  Read Full Report →
+                </div>
+              </Link>
+            ))}
           </div>
         )}
 

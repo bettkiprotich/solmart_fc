@@ -2,7 +2,7 @@ import { prisma } from "@/lib/db/prisma";
 import { MatchesCalendar } from "@/components/matches/MatchesCalendar";
 
 export const metadata = {
-  title: "Matches & Fixtures | Kahawa Pride FC",
+  title: "Matches & Fixtures | Solmart FC",
 };
 
 export default async function MatchesPage() {
