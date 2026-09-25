@@ -196,14 +196,6 @@ export default async function HomePage() {
           </div>
         </div>
       </section>
-
-      <section className="border-t border-zinc-200 bg-zinc-50">
-        <div className="mx-auto max-w-7xl px-5 py-14 text-center lg:px-8">
-          <p className="text-xs font-black uppercase tracking-[.3em] text-red-600">Proudly sponsored by</p>
-          <h2 className="mt-3 text-3xl font-black">Solmart Supermarket</h2>
-          <p className="mx-auto mt-2 max-w-xl text-sm text-zinc-500">Sponsorship information is presented as supplied by the club.</p>
-        </div>
-      </section>
     </div>
   );
 }

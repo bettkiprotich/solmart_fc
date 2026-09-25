@@ -33,16 +33,16 @@ export async function Footer() {
     <footer className="bg-black text-white">
       {/* Sponsor Banner */}
       {(clubSponsors.length > 0 || teamSponsors.length > 0) && (
-        <div className="border-b border-white/10 bg-zinc-950">
+        <div className="bg-white text-black">
           <div className="mx-auto max-w-7xl px-5 py-12 lg:px-8">
             {clubSponsors.length > 0 && (
               <div className="mb-10 text-center">
-                <h3 className="text-xs font-bold uppercase tracking-widest text-white/50 mb-6">Club Principal Partners</h3>
+                <h3 className="text-xs font-bold uppercase tracking-widest text-black/40 mb-6">Club Principal Partners</h3>
                 <div className="flex flex-wrap justify-center items-center gap-10 md:gap-16">
                   {clubSponsors.map(s => (
                     <Link key={s.id} href={`/sponsors/${s.id}`} className="block opacity-70 hover:opacity-100 transition-opacity">
                       {s.logoUrl ? (
-                        <Image src={s.logoUrl} alt={s.name} width={100} height={50} className="h-10 md:h-12 w-auto object-contain grayscale" />
+                        <Image src={s.logoUrl} alt={s.name} width={100} height={50} className="h-10 md:h-12 w-auto object-contain grayscale hover:grayscale-0 transition-all" />
                       ) : (
                         <span className="font-black text-xl">{s.name}</span>
                       )}
@@ -54,12 +54,12 @@ export async function Footer() {
             
             {teamSponsors.length > 0 && (
               <div className="text-center">
-                <h3 className="text-xs font-bold uppercase tracking-widest text-white/50 mb-6">Team Sponsors</h3>
+                <h3 className="text-xs font-bold uppercase tracking-widest text-black/40 mb-6">Team Sponsors</h3>
                 <div className="flex flex-wrap justify-center items-center gap-8 md:gap-12">
                   {teamSponsors.map(s => (
                     <Link key={s.id} href={`/sponsors/${s.id}`} className="block opacity-50 hover:opacity-100 transition-opacity">
                       {s.logoUrl ? (
-                        <Image src={s.logoUrl} alt={s.name} width={80} height={40} className="h-8 w-auto object-contain grayscale" />
+                        <Image src={s.logoUrl} alt={s.name} width={80} height={40} className="h-8 w-auto object-contain grayscale hover:grayscale-0 transition-all" />
                       ) : (
                         <span className="font-bold text-lg">{s.name}</span>
                       )}
