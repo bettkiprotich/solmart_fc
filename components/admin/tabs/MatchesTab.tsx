@@ -80,8 +80,8 @@ export function MatchesTab({ rows, teams, competitions, mutate }: { rows: AnyRec
           <div>
             <label className="mb-1 block text-xs font-bold uppercase tracking-wider text-black/50">Home team</label>
             <input className={inputClass} required list="team-names" placeholder="Home team" value={m.homeTeamName} onChange={(e) => setM({ ...m, homeTeamName: e.target.value })} />
-            <div className="mt-2 flex items-center gap-3">
-              <label className="cursor-pointer rounded-lg border px-3 py-2 text-xs font-bold">
+            <div className="mt-2 flex items-center gap-4">
+              <label className="rounded-xl border-2 border-dashed border-black/10 p-3 text-sm font-bold flex-1 cursor-pointer hover:bg-black/5 transition-colors">
                 {uploading === "home" ? "Uploading…" : "Upload home logo"}
                 <input
                   className="hidden"
@@ -95,14 +95,14 @@ export function MatchesTab({ rows, teams, competitions, mutate }: { rows: AnyRec
                   }}
                 />
               </label>
-              {m.homeTeamLogoUrl && <Image src={m.homeTeamLogoUrl} alt="Home team logo preview" width={40} height={40} className="size-10 rounded-full object-contain" />}
+              {m.homeTeamLogoUrl && <Image src={m.homeTeamLogoUrl} alt="Home team logo preview" width={48} height={48} className="size-12 rounded-full object-contain bg-zinc-50 border p-1" />}
             </div>
           </div>
           <div>
             <label className="mb-1 block text-xs font-bold uppercase tracking-wider text-black/50">Away team</label>
             <input className={inputClass} required list="team-names" placeholder="Away team" value={m.awayTeamName} onChange={(e) => setM({ ...m, awayTeamName: e.target.value })} />
-            <div className="mt-2 flex items-center gap-3">
-              <label className="cursor-pointer rounded-lg border px-3 py-2 text-xs font-bold">
+            <div className="mt-2 flex items-center gap-4">
+              <label className="rounded-xl border-2 border-dashed border-black/10 p-3 text-sm font-bold flex-1 cursor-pointer hover:bg-black/5 transition-colors">
                 {uploading === "away" ? "Uploading…" : "Upload away logo"}
                 <input
                   className="hidden"
@@ -116,7 +116,7 @@ export function MatchesTab({ rows, teams, competitions, mutate }: { rows: AnyRec
                   }}
                 />
               </label>
-              {m.awayTeamLogoUrl && <Image src={m.awayTeamLogoUrl} alt="Away team logo preview" width={40} height={40} className="size-10 rounded-full object-contain" />}
+              {m.awayTeamLogoUrl && <Image src={m.awayTeamLogoUrl} alt="Away team logo preview" width={48} height={48} className="size-12 rounded-full object-contain bg-zinc-50 border p-1" />}
             </div>
           </div>
           <datalist id="team-names">
