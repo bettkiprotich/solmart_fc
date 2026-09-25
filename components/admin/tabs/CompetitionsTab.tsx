@@ -30,15 +30,24 @@ export function CompetitionsTab({ rows, teams, mutate }: { rows: (Competition & 
     }));
   };
 
-  const remove = async (id: string) => {
+  const remove = async (id: string, name: string) => {
     if (id.startsWith("new-")) return setData(data.filter(r => r.id !== id));
-    if (!confirm("Delete tournament?")) return;
-    try {
-      await api("/api/admin/competitions", { method: "DELETE", body: JSON.stringify({ id }) });
-      mutate();
-    } catch (e) {
-      toast.error(e instanceof Error ? e.message : "Delete failed");
-    }
+    
+    toast(`Delete tournament "${name}"?`, {
+      action: {
+        label: "Yes, delete",
+        onClick: async () => {
+          try {
+            await api("/api/admin/competitions", { method: "DELETE", body: JSON.stringify({ id }) });
+            toast.success("Tournament deleted");
+            mutate();
+          } catch (e) {
+            toast.error(e instanceof Error ? e.message : "Delete failed");
+          }
+        }
+      },
+      cancel: { label: "Cancel", onClick: () => {} }
+    });
   };
 
   const save = async (row: any) => {
@@ -116,7 +125,7 @@ export function CompetitionsTab({ rows, teams, mutate }: { rows: (Competition & 
             </div>
 
             <div className="mt-6 flex justify-end gap-3 border-t pt-4">
-              <button onClick={() => remove(r.id)} className="flex items-center gap-2 rounded-lg px-4 py-2 text-sm font-bold text-red-600 hover:bg-red-50">
+              <button onClick={() => remove(r.id, r.name)} className="flex items-center gap-2 rounded-lg px-4 py-2 text-sm font-bold text-red-600 hover:bg-red-50">
                 <Trash2 className="h-4 w-4" /> Delete
               </button>
               <button onClick={() => save(r)} disabled={saving} className="flex items-center gap-2 rounded-lg bg-black px-4 py-2 text-sm font-bold text-white hover:bg-black/80 disabled:opacity-50">

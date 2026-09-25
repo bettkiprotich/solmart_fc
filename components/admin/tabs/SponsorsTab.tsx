@@ -4,7 +4,7 @@ import { toast } from "sonner";
 import Image from "next/image";
 
 export function SponsorsTab({ rows, mutate }: { rows: AnyRecord[]; mutate: any }) {
-  const blank = { name: "", websiteUrl: "", description: "", active: true };
+  const blank = { name: "", websiteUrl: "", description: "", about: "", branches: "[]", active: true };
   const [s, setS] = useState(blank as any);
   const [file, setFile] = useState<File | null>(null);
   const [busy, setBusy] = useState(false);
@@ -12,18 +12,23 @@ export function SponsorsTab({ rows, mutate }: { rows: AnyRecord[]; mutate: any }
 
   const startEdit = (x: any) => {
     setEditing(x);
-    setS({ name: x.name, websiteUrl: x.websiteUrl || "", description: x.description || "", active: x.active });
+    setS({ name: x.name, websiteUrl: x.websiteUrl || "", description: x.description || "", about: x.about || "", branches: JSON.stringify(x.branches || []), active: x.active });
     window.scrollTo({ top: 0, behavior: "smooth" });
   };
 
   const remove = async (x: any) => {
-    if (!confirm(`Delete sponsor "${x.name}"?`)) return;
-    try {
-      await mutate(`/api/admin/sponsors?id=${x.id}`, "DELETE");
-      toast.success("Sponsor deleted");
-    } catch (e) {
-      // Handled by mutate
-    }
+    toast(`Delete sponsor "${x.name}"?`, {
+      action: {
+        label: "Yes, delete",
+        onClick: async () => {
+          try {
+            await mutate(`/api/admin/sponsors?id=${x.id}`, "DELETE");
+            toast.success("Sponsor deleted");
+          } catch (e) {}
+        }
+      },
+      cancel: { label: "Cancel", onClick: () => {} }
+    });
   };
 
   return (
@@ -38,7 +43,12 @@ export function SponsorsTab({ rows, mutate }: { rows: AnyRecord[]; mutate: any }
             try {
               let logoUrl = editing?.logoUrl || null;
               if (file) logoUrl = await upload(file, "teams"); // Reuse "teams" folder for sponsor logos
-              await mutate(editing ? `/api/admin/sponsors?id=${editing.id}` : "/api/admin/sponsors", editing ? "PATCH" : "POST", { ...s, websiteUrl: s.websiteUrl || null, logoUrl });
+              let branchesData = [];
+              try {
+                branchesData = JSON.parse(s.branches);
+                if (!Array.isArray(branchesData)) branchesData = [];
+              } catch (err) {}
+              await mutate(editing ? `/api/admin/sponsors?id=${editing.id}` : "/api/admin/sponsors", editing ? "PATCH" : "POST", { ...s, websiteUrl: s.websiteUrl || null, branches: branchesData, logoUrl });
               toast.success(editing ? "Sponsor updated!" : "Sponsor added!");
               setS(blank);
               setFile(null);
@@ -52,12 +62,19 @@ export function SponsorsTab({ rows, mutate }: { rows: AnyRecord[]; mutate: any }
         >
           <input className={inputClass} placeholder="Sponsor name" required value={s.name} onChange={(e) => setS({ ...s, name: e.target.value })} />
           <input className={inputClass} type="url" placeholder="Website URL" value={s.websiteUrl} onChange={(e) => setS({ ...s, websiteUrl: e.target.value })} />
-          <input className={inputClass} placeholder="Description" value={s.description} onChange={(e) => setS({ ...s, description: e.target.value })} />
+          <input className={inputClass + " md:col-span-2"} placeholder="Short Description (for banner)" value={s.description} onChange={(e) => setS({ ...s, description: e.target.value })} />
+          <textarea className={inputClass + " md:col-span-2"} placeholder="About (Full text for sponsor page)" rows={3} value={s.about} onChange={(e) => setS({ ...s, about: e.target.value })} />
           
-          <label className="rounded-xl border-2 border-dashed border-black/10 p-4 text-sm font-bold md:col-span-2">
-            Sponsor Logo
-            <input className="mt-2 block w-full text-sm" type="file" accept="image/jpeg,image/png,image/webp,image/gif" onChange={(e) => setFile(e.target.files?.[0] || null)} />
-            {editing?.logoUrl && <span className="mt-2 block text-xs font-normal text-black/50">Current logo will remain if no replacement is selected.</span>}
+          <div className="md:col-span-2">
+            <p className="text-xs font-bold text-black/50 mb-2">Branches (JSON array of maps embeds, e.g. [{`"name":"Branch 1", "embedHtml": "..."`}]):</p>
+            <textarea className={inputClass + " font-mono text-xs"} placeholder={`[\n  {\n    "name": "Branch 1",\n    "embedHtml": "<iframe..."\n  }\n]`} rows={4} value={s.branches} onChange={(e) => setS({ ...s, branches: e.target.value })} />
+          </div>
+
+          <label className="rounded-xl border-2 border-dashed border-black/10 p-4 text-sm font-bold md:col-span-2 block cursor-pointer">
+            {editing ? "Upload new logo (optional)" : "Sponsor Logo"}
+            <input className="mt-2 block w-full text-sm hidden" type="file" accept="image/jpeg,image/png,image/webp,image/gif" onChange={(e) => setFile(e.target.files?.[0] || null)} />
+            {file && <span className="block mt-2 font-normal text-xs">{file.name}</span>}
+            {editing?.logoUrl && !file && <span className="mt-2 block text-xs font-normal text-black/50">Current logo will remain if no replacement is selected.</span>}
           </label>
           
           <label className="flex items-center gap-2 text-sm font-bold md:col-span-2">

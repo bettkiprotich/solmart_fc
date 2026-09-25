@@ -226,6 +226,8 @@ model Competition {
   country     String?
   isOfficial  Boolean      @default(false)
   description String?
+  about       String?
+  branches    Json?
   fixtures    Fixture[]
   tableRows   LeagueTable[]
   teams          Team[]         @relation("CompetitionTeams")
@@ -298,6 +300,8 @@ model NewsCategory {
   name        String
   slug        String        @unique
   description String?
+  about       String?
+  branches    Json?
   articles    NewsArticle[]
   createdAt   DateTime      @default(now())
   updatedAt   DateTime      @updatedAt
@@ -315,7 +319,9 @@ model NewsArticle {
   status        NewsStatus      @default(DRAFT)
   publishedAt   DateTime?
   seoTitle      String?
-  seoDescription String?
+  seodescription String?
+  about       String?
+  branches    Json?
   canonicalUrl  String?
   isDemoData    Boolean         @default(false)
   category      NewsCategory?   @relation(fields: [categoryId], references: [id], onDelete: SetNull)
@@ -331,6 +337,8 @@ model Gallery {
   title       String
   slug        String         @unique
   description String?
+  about       String?
+  branches    Json?
   published   Boolean        @default(false)
   images      GalleryImage[]
   createdAt   DateTime       @default(now())
@@ -355,6 +363,8 @@ model Video {
   url         String
   thumbnailUrl String?
   description String?
+  about       String?
+  branches    Json?
   published   Boolean  @default(false)
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
@@ -365,6 +375,8 @@ model Product {
   name        String
   slug        String          @unique
   description String?
+  about       String?
+  branches    Json?
   category    String
   status      ProductStatus   @default(DRAFT)
   featured    Boolean         @default(false)
@@ -506,6 +518,8 @@ model Sponsor {
   logoUrl     String?
   websiteUrl  String?
   description String?
+  about       String?
+  branches    Json?
   type        SponsorType  @default(CLUB)
   displayOrder Int         @default(0)
   active      Boolean      @default(true)
