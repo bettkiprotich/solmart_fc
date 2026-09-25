@@ -6,10 +6,18 @@ export const metadata = {
 };
 
 export default async function TeamsPage() {
-  const team = await prisma.team.findFirst({
-    where: { isActive: true },
-    orderBy: { createdAt: "asc" } // Get the first created active team (SolmartFC)
+  // First try to find the main club team
+  let team = await prisma.team.findFirst({
+    where: { isActive: true, name: { contains: "Solmart", mode: "insensitive" } },
   });
+
+  // Fallback to the most recently added team
+  if (!team) {
+    team = await prisma.team.findFirst({
+      where: { isActive: true },
+      orderBy: { createdAt: "desc" }
+    });
+  }
 
   if (team) {
     redirect(`/teams/${team.slug}`);
