@@ -146,7 +146,7 @@ export default async function HomePage() {
                   </tbody>
                 </table>
                 <div className="p-3 bg-zinc-50 text-center border-t">
-                  <Link href="/teams" className="text-xs font-bold uppercase tracking-widest text-red-600 hover:text-red-700">Full Table →</Link>
+                  <Link href="/team" className="text-xs font-bold uppercase tracking-widest text-red-600 hover:text-red-700">Full Table →</Link>
                 </div>
               </div>
             )}
@@ -164,7 +164,7 @@ export default async function HomePage() {
       </section>
 
       <section className="mx-auto max-w-7xl px-5 py-16 lg:px-8">
-        <SectionHeading eyebrow="The squad" title="Meet the team" description="Squad records are database-driven and replaceable through the CMS." href="/teams" linkLabel="View squad" />
+        <SectionHeading eyebrow="The squad" title="Meet the team" description="Squad records are database-driven and replaceable through the CMS." href="/team" linkLabel="View squad" />
         <div className="mt-7 grid gap-5 sm:grid-cols-2 lg:grid-cols-4">
           {players.slice(0, 4).map(p => <PlayerCard key={p.id} player={p} />)}
         </div>

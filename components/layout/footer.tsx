@@ -70,7 +70,7 @@ export async function Footer() {
           <h2 className="font-black uppercase tracking-widest text-white/50 text-xs">Club</h2>
           <div className="mt-4 space-y-2 text-sm font-bold">
             <Link className="block hover:text-white text-white/70" href="/club">Club Hub</Link>
-            <Link className="block hover:text-white text-white/70" href="/teams">Teams</Link>
+            <Link className="block hover:text-white text-white/70" href="/team">Team</Link>
             <Link className="block hover:text-white text-white/70" href="/matches">Matches</Link>
           </div>
         </div>
