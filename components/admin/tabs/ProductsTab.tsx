@@ -4,29 +4,75 @@ import { toast } from "sonner";
 import Image from "next/image";
 
 export function ProductsTab({ rows, mutate }: { rows: AnyRecord[]; mutate: any }) {
-  const [newP, setNewP] = useState({ name: "", category: "Jerseys", description: "", status: "DRAFT", featured: false, price: "", salePrice: "", sizes: "XS,S,M,L,XL,XXL", skuPrefix: "SOLMART" });
+  const blank = { name: "", category: "Jerseys", description: "", status: "DRAFT", featured: false, price: "", salePrice: "", sizes: "XS,S,M,L,XL,XXL", skuPrefix: "SOLMART" };
+  const [newP, setNewP] = useState(blank as any);
   const [file, setFile] = useState<File | null>(null);
   const [busy, setBusy] = useState(false);
+  const [editing, setEditing] = useState<AnyRecord | null>(null);
+
+  const startEdit = (p: any) => {
+    setEditing(p);
+    setNewP({
+      name: p.name,
+      category: p.category || "",
+      description: p.description || "",
+      status: p.status,
+      featured: p.featured || false,
+      price: p.variants?.[0]?.price || "",
+      salePrice: p.variants?.[0]?.salePrice || "",
+      sizes: "XS,S,M,L,XL,XXL", // Not easily editable for existing products right now
+      skuPrefix: "SOLMART"
+    });
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  };
+
+  const remove = async (x: any) => {
+    if (!confirm(`Delete product "${x.name}"?`)) return;
+    try {
+      await mutate(`/api/admin/products?id=${x.id}`, "DELETE");
+      toast.success("Product deleted");
+    } catch (e) {
+      // Handled by mutate
+    }
+  };
 
   const create = async (e: any) => {
     e.preventDefault();
     setBusy(true);
     try {
-      const sizes = newP.sizes.split(",").map((x: string) => x.trim()).filter(Boolean);
-      const price = Number(newP.price);
-      const sale = newP.salePrice ? Number(newP.salePrice) : null;
-      const variants = sizes.map((size: string, i: number) => ({ sku: `${newP.skuPrefix}-${size}-${Date.now()}-${i}`, size, price, salePrice: sale, stock: 0 }));
-      const d = await api("/api/admin/products", { method: "POST", body: JSON.stringify({ ...newP, price: undefined, salePrice: undefined, variants }) });
-      if (file) {
-        const url = await upload(file, "products");
-        await api("/api/admin/product-images", { method: "POST", body: JSON.stringify({ productId: d.product.id, url, altText: newP.name, sortOrder: 0 }) });
+      if (editing) {
+        // Just update product metadata for now
+        await mutate(`/api/admin/products?id=${editing.id}`, "PATCH", {
+          name: newP.name,
+          category: newP.category,
+          description: newP.description,
+          status: newP.status,
+          featured: newP.featured,
+        });
+        if (file) {
+          const url = await upload(file, "products");
+          // Re-uploading an image: we just post a new one. To keep it simple we assume it adds to the gallery or overrides.
+          await api("/api/admin/product-images", { method: "POST", body: JSON.stringify({ productId: editing.id, url, altText: newP.name, sortOrder: 0 }) });
+        }
+        toast.success("Product updated!");
+      } else {
+        const sizes = newP.sizes.split(",").map((x: string) => x.trim()).filter(Boolean);
+        const price = Number(newP.price);
+        const sale = newP.salePrice ? Number(newP.salePrice) : null;
+        const variants = sizes.map((size: string, i: number) => ({ sku: `${newP.skuPrefix}-${size}-${Date.now()}-${i}`, size, price, salePrice: sale, stock: 0 }));
+        const d = await api("/api/admin/products", { method: "POST", body: JSON.stringify({ ...newP, price: undefined, salePrice: undefined, variants }) });
+        if (file) {
+          const url = await upload(file, "products");
+          await api("/api/admin/product-images", { method: "POST", body: JSON.stringify({ productId: d.product.id, url, altText: newP.name, sortOrder: 0 }) });
+        }
+        toast.success("Product created!");
       }
-      setNewP({ ...newP, name: "", description: "", price: "", salePrice: "" });
+      setNewP(blank);
       setFile(null);
+      setEditing(null);
       mutate();
-      toast.success("Product created!");
     } catch (err) {
-      toast.error(err instanceof Error ? err.message : "Unable to create product.");
+      toast.error(err instanceof Error ? err.message : "Unable to save product.");
     } finally {
       setBusy(false);
     }
@@ -35,146 +81,71 @@ export function ProductsTab({ rows, mutate }: { rows: AnyRecord[]; mutate: any }
   return (
     <div className="space-y-5">
       <div className={cardClass}>
-        <h2 className="text-xl font-black">Merchandise</h2>
-        <p className="mt-1 text-sm text-black/50">Add a new arrival with its product photo, price, sizes and stock.</p>
+        <h2 className="text-xl font-black">{editing ? "Edit Product Details" : "Merchandise"}</h2>
+        <p className="mt-1 text-sm text-black/50">{editing ? "Edit basic details. Note: variant prices and stock must be edited via specific inventory endpoints in a future update." : "Add a new arrival with its product photo, price, sizes and stock."}</p>
         <form className="mt-4 grid gap-3 md:grid-cols-2" onSubmit={create}>
           <input className={inputClass} placeholder="Product name" required value={newP.name} onChange={(e) => setNewP({ ...newP, name: e.target.value })} />
-          <div className="rounded-xl bg-neutral-50 px-3 py-2.5 text-sm text-black/60">
-            <span className="font-black text-black/70">URL preview:</span> <span className="font-mono">/shop/{slugPreview(newP.name)}</span>
-          </div>
-          <input className={inputClass} placeholder="Category" value={newP.category} onChange={(e) => setNewP({ ...newP, category: e.target.value })} />
+          {!editing && (
+            <div className="rounded-xl bg-neutral-50 px-3 py-2.5 text-sm text-black/60">
+              <span className="font-black text-black/70">URL preview:</span> <span className="font-mono">/shop/{slugPreview(newP.name)}</span>
+            </div>
+          )}
+          <input className={inputClass + (editing ? " md:col-span-1" : "")} placeholder="Category" value={newP.category} onChange={(e) => setNewP({ ...newP, category: e.target.value })} />
           <select className={inputClass} value={newP.status} onChange={(e) => setNewP({ ...newP, status: e.target.value })}>
             {["DRAFT", "ACTIVE", "OUT_OF_STOCK", "ARCHIVED"].map((s) => (
               <option key={s}>{s}</option>
             ))}
           </select>
-          <input className={inputClass} type="number" min="0" step="0.01" placeholder="Price (KES)" required value={newP.price} onChange={(e) => setNewP({ ...newP, price: e.target.value })} />
-          <input className={inputClass} type="number" min="0" step="0.01" placeholder="Sale price (optional)" value={newP.salePrice} onChange={(e) => setNewP({ ...newP, salePrice: e.target.value })} />
-          <input className={inputClass} placeholder="Sizes, e.g. XS,S,M,L,XL,XXL" value={newP.sizes} onChange={(e) => setNewP({ ...newP, sizes: e.target.value })} />
-          <input className={inputClass} placeholder="SKU prefix" value={newP.skuPrefix} onChange={(e) => setNewP({ ...newP, skuPrefix: e.target.value })} />
-          <textarea className={inputClass + " md:col-span-2"} placeholder="Description" value={newP.description} onChange={(e) => setNewP({ ...newP, description: e.target.value })} />
-          <label className="md:col-span-2 rounded-xl border-2 border-dashed border-black/10 p-4 text-sm font-bold">
-            Product photo
-            <input className="mt-2 block w-full text-sm" type="file" accept="image/jpeg,image/png,image/webp,image/gif" required onChange={(e) => setFile(e.target.files?.[0] || null)} />
+          <label className="flex items-center gap-2 text-sm font-bold md:col-span-2">
+            <input type="checkbox" checked={newP.featured} onChange={(e) => setNewP({ ...newP, featured: e.target.checked })} /> Featured product
           </label>
-          <button disabled={busy} className="rounded-xl bg-red-600 px-4 py-3 font-black text-white disabled:opacity-50 md:col-span-2">
-            {busy ? "Creating…" : "Add merchandise"}
-          </button>
+          <textarea className={inputClass + " min-h-24 md:col-span-2"} placeholder="Product description" value={newP.description} onChange={(e) => setNewP({ ...newP, description: e.target.value })} />
+          
+          {!editing && (
+            <>
+              <input className={inputClass} placeholder="Base Price (Ksh)" required type="number" min="0" step="0.01" value={newP.price} onChange={(e) => setNewP({ ...newP, price: e.target.value })} />
+              <input className={inputClass} placeholder="Sale Price (Optional)" type="number" min="0" step="0.01" value={newP.salePrice} onChange={(e) => setNewP({ ...newP, salePrice: e.target.value })} />
+              <input className={inputClass} placeholder="Sizes (comma separated)" required value={newP.sizes} onChange={(e) => setNewP({ ...newP, sizes: e.target.value })} />
+              <input className={inputClass} placeholder="SKU Prefix" required value={newP.skuPrefix} onChange={(e) => setNewP({ ...newP, skuPrefix: e.target.value })} />
+            </>
+          )}
+
+          <label className="md:col-span-2 rounded-xl border-2 border-dashed border-black/10 p-4 text-sm font-bold">
+            {editing ? "Add Additional Product Photo" : "Product photo"}
+            <input className="mt-2 block w-full text-sm" type="file" accept="image/jpeg,image/png,image/webp,image/gif" required={!editing} onChange={(e) => setFile(e.target.files?.[0] || null)} />
+          </label>
+          <div className="flex gap-2 md:col-span-2">
+            <button disabled={busy} className="rounded-xl bg-red-600 px-4 py-3 font-black text-white disabled:opacity-50">
+              {busy ? "Saving..." : editing ? "Save changes" : "Create product"}
+            </button>
+            {editing && (
+              <button type="button" onClick={() => { setEditing(null); setNewP(blank); setFile(null); }} className="rounded-xl border px-4 py-3 font-black">Cancel</button>
+            )}
+          </div>
         </form>
       </div>
-      <div className="grid gap-4">
+
+      <div className={cardClass}>
         {rows.map((p) => (
-          <div className={cardClass} key={p.id}>
-            <div className="flex flex-wrap justify-between gap-3">
-              <div className="flex gap-4">
-                <div className="h-20 w-20 overflow-hidden rounded-xl bg-zinc-100">
-                  {p.images?.[0]?.url && <Image src={p.images[0].url} alt={p.images[0].altText || p.name} width={80} height={80} className="h-full w-full object-contain" />}
-                </div>
-                <div>
-                  <h3 className="font-black">{p.name}</h3>
-                  <p className="text-sm text-black/50">
-                    {p.slug} · {p.status}
-                  </p>
+          <div key={p.id} className="flex items-start justify-between gap-4 border-b py-4 last:border-0">
+            <div className="flex gap-4 items-center">
+              <div className="h-16 w-16 shrink-0 overflow-hidden rounded-xl bg-zinc-100 p-2 border">
+                {p.images?.[0]?.url && <Image src={p.images[0].url} alt={p.images[0].altText || p.name} width={80} height={80} className="h-full w-full object-contain" />}
+              </div>
+              <div>
+                <b>{p.name}</b>
+                <p className="text-xs text-black/50">{p.category} A {p.variants?.length || 0} variants</p>
+                <div className="mt-1">
+                  <span className={`text-[10px] font-black uppercase tracking-widest ${p.status === "ACTIVE" ? "text-green-600" : "text-black/40"}`}>{p.status}</span>
                 </div>
               </div>
-              <div className="flex flex-wrap gap-2">
-                <button
-                  className="rounded-lg border px-3 py-2 text-xs font-bold"
-                  onClick={() => mutate(`/api/admin/products?id=${p.id}`, "PATCH", { status: p.status === "ACTIVE" ? "ARCHIVED" : "ACTIVE" })}
-                >
-                  {p.status === "ACTIVE" ? "Archive" : "Activate"}
-                </button>
-                <button
-                  className="rounded-lg border border-red-200 px-3 py-2 text-xs font-bold text-red-700"
-                  onClick={async () => {
-                    if (!window.confirm(`Remove ${p.name}? If it has existing orders/cart records, it will be archived instead of permanently deleted.`)) return;
-                    try {
-                      const d = await api(`/api/admin/products?id=${p.id}`, { method: "DELETE" });
-                      toast.success(d.message || "Product removed.");
-                      mutate();
-                    } catch (e) {
-                      toast.error(e instanceof Error ? e.message : "Unable to remove product.");
-                    }
-                  }}
-                >
-                  Remove
-                </button>
-              </div>
             </div>
-            <div className="mt-4 grid gap-2 sm:grid-cols-2 lg:grid-cols-3">
-              {p.variants?.map((v: any) => (
-                <VariantStock key={v.id} p={p} v={v} mutate={mutate} />
-              ))}
+            <div className="flex flex-col gap-2 shrink-0">
+              <button type="button" className="text-xs font-bold hover:underline text-right" onClick={() => startEdit(p)}>Edit</button>
+              <button type="button" className="text-xs font-bold text-red-600 hover:underline text-right" onClick={() => remove(p)}>Delete</button>
             </div>
-            <ProductImages product={p} mutate={mutate} />
           </div>
         ))}
-      </div>
-    </div>
-  );
-}
-
-function VariantStock({ p, v, mutate }: { p: any; v: any; mutate: any }) {
-  const [stock, setStock] = useState(String(v.stock));
-  return (
-    <div className="rounded-xl border p-3">
-      <b>{v.size || "One size"}</b>
-      <div className="text-xs text-black/50">
-        SKU {v.sku} · KES {String(v.salePrice ?? v.price)}
-      </div>
-      <div className="mt-2 flex gap-2">
-        <input className={inputClass} type="number" min="0" value={stock} onChange={(e) => setStock(e.target.value)} />
-        <button
-          className="rounded-lg bg-black px-3 text-xs font-black text-white"
-          onClick={() =>
-            mutate(`/api/admin/products?id=${p.id}`, "PATCH", {
-              variants: [{ id: v.id, sku: v.sku, size: v.size, price: Number(v.price), salePrice: v.salePrice ? Number(v.salePrice) : null, stock: Number(stock) }],
-            })
-          }
-        >
-          Save
-        </button>
-      </div>
-    </div>
-  );
-}
-
-function ProductImages({ product, mutate }: { product: any; mutate: any }) {
-  const [file, setFile] = useState<File | null>(null);
-  const [busy, setBusy] = useState(false);
-  const add = async () => {
-    if (!file) return;
-    setBusy(true);
-    try {
-      const url = await upload(file, "products");
-      await api("/api/admin/product-images", { method: "POST", body: JSON.stringify({ productId: product.id, url, altText: product.name, sortOrder: product.images?.length || 0 }) });
-      toast.success("Image added!");
-      mutate();
-      setFile(null);
-    } catch (e) {
-      toast.error(e instanceof Error ? e.message : "Unable to add image.");
-    } finally {
-      setBusy(false);
-    }
-  };
-  return (
-    <div className="mt-5 border-t pt-4">
-      <p className="text-sm font-black">Product photos</p>
-      <div className="mt-3 flex flex-wrap gap-3">
-        {product.images?.map((im: any) => (
-          <div key={im.id} className="relative h-24 w-24 overflow-hidden rounded-xl bg-zinc-100">
-            <Image src={im.url} alt={im.altText} width={96} height={96} className="h-full w-full object-contain" />
-            <button type="button" className="absolute right-1 top-1 rounded-full bg-black px-2 py-1 text-xs font-black text-white" onClick={() => mutate(`/api/admin/product-images?id=${im.id}`, "DELETE", {})}>
-              ×
-            </button>
-          </div>
-        ))}
-        <div className="flex items-center gap-2">
-          <input type="file" accept="image/jpeg,image/png,image/webp,image/gif" onChange={(e) => setFile(e.target.files?.[0] || null)} />
-          <button disabled={!file || busy} onClick={add} className="rounded-lg bg-red-600 px-3 py-2 text-xs font-black text-white disabled:opacity-50">
-            {busy ? "Adding..." : "Add photo"}
-          </button>
-        </div>
       </div>
     </div>
   );

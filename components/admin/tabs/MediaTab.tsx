@@ -10,22 +10,31 @@ export function MediaTab({ galleries, videos, mutate }: { galleries: AnyRecord[]
   const [files, setFiles] = useState<File[]>([]);
   const [videoFile, setVideoFile] = useState<File | null>(null);
 
+  const [editingG, setEditingG] = useState<AnyRecord | null>(null);
+  const [editingV, setEditingV] = useState<AnyRecord | null>(null);
+
   const createGallery = async (e: any) => {
     e.preventDefault();
     try {
-      await mutate("/api/admin/media", "POST", g);
+      if (editingG) {
+        await mutate(`/api/admin/media?id=${editingG.id}`, "PATCH", { ...g, id: editingG.id, type: "gallery" });
+        toast.success("Gallery updated!");
+        setEditingG(null);
+      } else {
+        await mutate("/api/admin/media", "POST", { ...g, type: "gallery" });
+        toast.success("Gallery created!");
+      }
       setG({ title: "", description: "", published: false });
-      toast.success("Gallery created!");
     } catch (e) {
-      toast.error(e instanceof Error ? e.message : "Unable to create gallery.");
+      toast.error(e instanceof Error ? e.message : "Unable to save gallery.");
     }
   };
 
   const addImages = async () => {
     if (!selected || files.length === 0) return;
     try {
-      const g = galleries.find((x) => x.id === selected);
-      const sortOrder = g?.images?.length || 0;
+      const gal = galleries.find((x) => x.id === selected);
+      const sortOrder = gal?.images?.length || 0;
       for (let i = 0; i < files.length; i++) {
         const url = await upload(files[i], "galleries");
         await api("/api/admin/gallery-images", {
@@ -46,21 +55,26 @@ export function MediaTab({ galleries, videos, mutate }: { galleries: AnyRecord[]
     try {
       let url = v.url;
       if (videoFile) url = await uploadVideo(videoFile);
-      await api("/api/admin/media", { method: "POST", body: JSON.stringify({ type: "video", title: v.title, url, published: v.published }) });
+      if (editingV) {
+        await mutate(`/api/admin/media?id=${editingV.id}`, "PATCH", { id: editingV.id, type: "video", title: v.title, url, published: v.published });
+        toast.success("Video updated!");
+        setEditingV(null);
+      } else {
+        await mutate("/api/admin/media", "POST", { type: "video", title: v.title, url, published: v.published });
+        toast.success("Video added!");
+      }
       setV({ title: "", url: "", published: false });
       setVideoFile(null);
-      mutate();
-      toast.success("Video added!");
     } catch (e) {
-      toast.error(e instanceof Error ? e.message : "Unable to add video.");
+      toast.error(e instanceof Error ? e.message : "Unable to save video.");
     }
   };
 
   return (
     <div className="grid gap-5 lg:grid-cols-2">
       <div className={cardClass}>
-        <h2 className="text-xl font-black">Galleries</h2>
-        <p className="mt-1 text-sm text-black/50">Create galleries, upload multiple photos, preview them, and remove individual images.</p>
+        <h2 className="text-xl font-black">{editingG ? "Edit Gallery Details" : "Galleries"}</h2>
+        <p className="mt-1 text-sm text-black/50">{editingG ? "Update the gallery title, description, or visibility." : "Create galleries, upload multiple photos, preview them, and remove individual images."}</p>
         <form className="mt-4 space-y-3" onSubmit={createGallery}>
           <input className={inputClass} placeholder="Gallery title" required value={g.title} onChange={(e) => setG({ ...g, title: e.target.value })} />
           <div className="rounded-xl bg-neutral-50 px-3 py-2.5 text-sm text-black/60">
@@ -70,7 +84,12 @@ export function MediaTab({ galleries, videos, mutate }: { galleries: AnyRecord[]
           <label className="flex items-center gap-2 text-sm font-bold">
             <input type="checkbox" checked={g.published} onChange={(e) => setG({ ...g, published: e.target.checked })} /> Publish gallery
           </label>
-          <button className="rounded-xl bg-red-600 px-4 py-3 font-black text-white">Create gallery</button>
+          <div className="flex gap-2">
+            <button className="rounded-xl bg-red-600 px-4 py-3 font-black text-white">{editingG ? "Save changes" : "Create gallery"}</button>
+            {editingG && (
+              <button type="button" className="rounded-xl border px-4 py-3 font-black" onClick={() => { setEditingG(null); setG({ title: "", description: "", published: false }); }}>Cancel edit</button>
+            )}
+          </div>
         </form>
         <div className="mt-5 space-y-5">
           {galleries.map((x) => (
@@ -80,9 +99,10 @@ export function MediaTab({ galleries, videos, mutate }: { galleries: AnyRecord[]
                   <b>{x.title}</b>
                   <span className="ml-2 text-xs text-black/50">{x.published ? "Published" : "Draft"}</span>
                 </div>
-                <button type="button" className="rounded-lg border px-3 py-2 text-xs font-bold" onClick={() => mutate(`/api/admin/media?id=${x.id}&type=gallery`, "DELETE", {})}>
-                  Delete gallery
-                </button>
+                <div className="flex gap-2">
+                  <button type="button" className="rounded-lg border px-3 py-2 text-xs font-bold" onClick={() => { setEditingG(x); setG({ title: x.title, description: x.description || "", published: x.published }); window.scrollTo({ top: 0, behavior: "smooth" }); }}>Edit</button>
+                  <button type="button" className="rounded-lg border px-3 py-2 text-xs font-bold" onClick={() => { if (confirm(`Delete gallery ${x.title}?`)) mutate(`/api/admin/media?id=${x.id}&type=gallery`, "DELETE", {}) }}>Delete</button>
+                </div>
               </div>
               <div className="mt-3 grid grid-cols-3 gap-2">
                 {x.images?.map((im: any) => (
@@ -113,23 +133,30 @@ export function MediaTab({ galleries, videos, mutate }: { galleries: AnyRecord[]
           ))}
         </div>
       </div>
+      
       <div className={cardClass}>
-        <h2 className="text-xl font-black">Videos</h2>
+        <h2 className="text-xl font-black">{editingV ? "Edit Video" : "Videos"}</h2>
         <p className="mt-1 text-sm text-black/50">Upload MP4 or WebM videos, or add a YouTube/Vimeo URL.</p>
         <form className="mt-4 space-y-3" onSubmit={addVideo}>
           <input className={inputClass} placeholder="Video title" required value={v.title} onChange={(e) => setV({ ...v, title: e.target.value })} />
-          <label className="rounded-xl border-2 border-dashed border-black/10 p-4 text-sm font-bold">
-            Upload video
-            <input className="mt-2 block w-full text-sm" type="file" accept="video/mp4,video/webm" onChange={(e) => setVideoFile(e.target.files?.[0] || null)} />
+          <label className="rounded-xl border-2 border-dashed border-black/10 p-4 text-sm font-bold block cursor-pointer">
+            {editingV ? "Upload new video (optional)" : "Upload video"}
+            <input className="mt-2 block w-full text-sm hidden" type="file" accept="video/mp4,video/webm" onChange={(e) => setVideoFile(e.target.files?.[0] || null)} />
+            {videoFile && <span className="block mt-2 font-normal text-xs">{videoFile.name}</span>}
           </label>
           <div className="text-center text-xs font-bold text-black/40">OR</div>
           <input className={inputClass} placeholder="External video URL (optional if uploading)" type="url" value={v.url} onChange={(e) => setV({ ...v, url: e.target.value })} />
           <label className="flex items-center gap-2 text-sm font-bold">
             <input type="checkbox" checked={v.published} onChange={(e) => setV({ ...v, published: e.target.checked })} /> Publish video
           </label>
-          <button disabled={!videoFile && !v.url} className="rounded-xl bg-red-600 px-4 py-3 font-black text-white disabled:opacity-50">
-            Add video
-          </button>
+          <div className="flex gap-2">
+            <button disabled={!videoFile && !v.url && !editingV} className="rounded-xl bg-red-600 px-4 py-3 font-black text-white disabled:opacity-50">
+              {editingV ? "Save changes" : "Add video"}
+            </button>
+            {editingV && (
+              <button type="button" className="rounded-xl border px-4 py-3 font-black" onClick={() => { setEditingV(null); setV({ title: "", url: "", published: false }); setVideoFile(null); }}>Cancel</button>
+            )}
+          </div>
         </form>
         <div className="mt-5 space-y-2">
           {videos.map((x) => (
@@ -138,9 +165,10 @@ export function MediaTab({ galleries, videos, mutate }: { galleries: AnyRecord[]
                 <b>{x.title}</b>
                 <p className="max-w-xs truncate text-xs text-black/50">{x.url}</p>
               </div>
-              <button type="button" className="rounded-lg border px-3 py-2 text-xs font-bold" onClick={() => mutate(`/api/admin/media?id=${x.id}&type=video`, "DELETE", {})}>
-                Delete
-              </button>
+              <div className="flex gap-2 shrink-0">
+                <button type="button" className="rounded-lg border px-3 py-2 text-xs font-bold" onClick={() => { setEditingV(x); setV({ title: x.title, url: x.url, published: x.published }); }}>Edit</button>
+                <button type="button" className="rounded-lg border px-3 py-2 text-xs font-bold" onClick={() => { if (confirm(`Delete video?`)) mutate(`/api/admin/media?id=${x.id}&type=video`, "DELETE", {}) }}>Delete</button>
+              </div>
             </div>
           ))}
         </div>

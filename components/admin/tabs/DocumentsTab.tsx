@@ -7,6 +7,13 @@ export function DocumentsTab({ rows, mutate }: { rows: AnyRecord[]; mutate: any 
   const [d, setD] = useState(blank);
   const [file, setFile] = useState<File | null>(null);
   const [busy, setBusy] = useState(false);
+  const [editing, setEditing] = useState<AnyRecord | null>(null);
+
+  const startEdit = (x: any) => {
+    setEditing(x);
+    setD({ title: x.title, type: x.type, url: x.url });
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  };
 
   const save = async (e: any) => {
     e.preventDefault();
@@ -18,10 +25,11 @@ export function DocumentsTab({ rows, mutate }: { rows: AnyRecord[]; mutate: any 
       }
       
       const body = { ...d, url: finalUrl };
-      await mutate("/api/admin/documents", "POST", body);
-      toast.success("Document saved!");
+      await mutate(editing ? `/api/admin/documents?id=${editing.id}` : "/api/admin/documents", editing ? "PATCH" : "POST", body);
+      toast.success(editing ? "Document updated!" : "Document saved!");
       setD(blank);
       setFile(null);
+      setEditing(null);
     } catch (err) {
       toast.error("Failed to save document.");
     } finally {
@@ -33,15 +41,16 @@ export function DocumentsTab({ rows, mutate }: { rows: AnyRecord[]; mutate: any 
     if (!confirm(`Delete ${x.title}?`)) return;
     try {
       await mutate(`/api/admin/documents?id=${x.id}`, "DELETE", {});
+      toast.success("Document deleted");
     } catch (e) {
-      toast.error("Failed to delete document");
+      // toast.error handled via mutate usually
     }
   };
 
   return (
     <div className="space-y-5">
       <div className={cardClass}>
-        <h2 className="text-xl font-black">Documents & Policies</h2>
+        <h2 className="text-xl font-black">{editing ? "Edit Document" : "Documents & Policies"}</h2>
         <form className="mt-4 grid gap-3 md:grid-cols-2" onSubmit={save}>
           <input className={inputClass} placeholder="Title" required value={d.title} onChange={(e) => setD({ ...d, title: e.target.value })} />
           <select className={inputClass} value={d.type} onChange={(e) => setD({ ...d, type: e.target.value })}>
@@ -49,19 +58,22 @@ export function DocumentsTab({ rows, mutate }: { rows: AnyRecord[]; mutate: any 
               <option key={s}>{s}</option>
             ))}
           </select>
+          <label className="rounded-xl border-2 border-dashed border-black/10 p-4 text-sm font-bold md:col-span-2 block cursor-pointer">
+            {editing ? "Upload new file (optional)" : "Upload File"}
+            <input className="mt-2 block w-full text-sm hidden" type="file" accept=".pdf,.doc,.docx" required={!editing && d.type !== "LINK"} onChange={(e) => setFile(e.target.files?.[0] || null)} />
+            {file && <span className="block mt-2 font-normal text-xs">{file.name}</span>}
+          </label>
+          <div className="text-center text-xs font-bold text-black/40 md:col-span-2">OR (If linking externally)</div>
+          <input className={inputClass + " md:col-span-2"} type="url" placeholder="URL Link" value={d.url} onChange={(e) => setD({ ...d, url: e.target.value })} required={d.type === "LINK"} />
           
-          {d.type === "LINK" ? (
-            <input className={inputClass + " md:col-span-2"} type="url" placeholder="External URL" required value={d.url} onChange={(e) => setD({ ...d, url: e.target.value })} />
-          ) : (
-            <label className="rounded-xl border-2 border-dashed border-black/10 p-4 text-sm font-bold md:col-span-2">
-              Upload File (PDF, Word, etc.)
-              <input className="mt-2 block w-full text-sm" type="file" onChange={(e) => setFile(e.target.files?.[0] || null)} required />
-            </label>
-          )}
-
-          <button disabled={busy} className="rounded-xl bg-red-600 px-4 py-3 font-black text-white md:col-span-2 disabled:opacity-50">
-            {busy ? "Saving..." : "Add Document"}
-          </button>
+          <div className="flex gap-2 md:col-span-2">
+            <button disabled={busy} className="rounded-xl bg-red-600 px-4 py-3 font-black text-white disabled:opacity-50">
+              {busy ? "Saving..." : editing ? "Save changes" : "Upload"}
+            </button>
+            {editing && (
+              <button type="button" onClick={() => { setEditing(null); setD(blank); setFile(null); }} className="rounded-xl border px-4 py-3 font-black">Cancel</button>
+            )}
+          </div>
         </form>
       </div>
 
@@ -70,9 +82,15 @@ export function DocumentsTab({ rows, mutate }: { rows: AnyRecord[]; mutate: any 
           <div key={x.id} className="flex items-center justify-between border-b py-3 last:border-0">
             <div>
               <b>{x.title}</b>
-              <p className="text-sm text-black/50">{x.type} · <a href={x.url} target="_blank" rel="noreferrer" className="underline">View</a></p>
+              <div className="flex items-center gap-2">
+                <span className="text-[10px] font-black text-black/40 uppercase">{x.type}</span>
+                <a href={x.url} target="_blank" rel="noreferrer" className="text-xs text-blue-600 hover:underline">View File</a>
+              </div>
             </div>
-            <button className="rounded-lg border border-red-200 px-3 py-2 text-xs font-bold text-red-700" onClick={() => remove(x)}>Delete</button>
+            <div className="flex gap-3">
+              <button type="button" className="text-xs font-bold hover:underline" onClick={() => startEdit(x)}>Edit</button>
+              <button type="button" className="text-xs font-bold text-red-600 hover:underline" onClick={() => remove(x)}>Delete</button>
+            </div>
           </div>
         ))}
       </div>

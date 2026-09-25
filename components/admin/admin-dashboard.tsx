@@ -1,6 +1,7 @@
 "use client";
 import { useEffect, useState } from "react";
 import { Toaster, toast } from "sonner";
+import { Home, ShoppingCart, Package, Users, Shield, Trophy, ListOrdered, Swords, Activity, Newspaper, Image, Briefcase, FileText, Settings, MessageSquare } from "lucide-react";
 import { OverviewTab } from "./tabs/OverviewTab";
 import { OrdersTab } from "./tabs/OrdersTab";
 import { ProductsTab } from "./tabs/ProductsTab";
@@ -97,75 +98,116 @@ export function AdminDashboard({ admin }: { admin: AdminUser }) {
     }
   }
 
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+
   return (
-    <main className="min-h-screen bg-neutral-100">
+    <main className="flex h-screen bg-neutral-50 overflow-hidden text-black font-sans">
       <Toaster position="top-right" richColors />
-      <div className="border-b border-black/10 bg-neutral-950 text-white">
-        <div className="mx-auto max-w-7xl px-5 py-7">
-          <div className="flex flex-wrap items-end justify-between gap-4">
-            <div>
-              <p className="text-xs font-black uppercase tracking-[.25em] text-red-500">Solmart FC</p>
-              <h1 className="mt-2 text-3xl font-black">Club Admin</h1>
-              <p className="mt-1 text-sm text-white/60">Content, squad, fixtures, commerce and customer operations.</p>
-            </div>
-            <div className="text-right text-sm">
-              <strong>{admin.firstName || admin.email}</strong>
-              <div className="text-white/50">{admin.role}</div>
-            </div>
+      
+      {/* Mobile Menu Overlay */}
+      {mobileMenuOpen && (
+        <div className="fixed inset-0 z-40 bg-black/50 lg:hidden" onClick={() => setMobileMenuOpen(false)} />
+      )}
+
+      {/* Sidebar */}
+      <aside className={`fixed inset-y-0 left-0 z-50 w-64 bg-neutral-950 text-white transform transition-transform duration-200 ease-in-out lg:static lg:translate-x-0 ${mobileMenuOpen ? 'translate-x-0' : '-translate-x-full'} flex flex-col`}>
+        <div className="p-6 shrink-0">
+          <div className="flex justify-between items-center lg:hidden mb-6">
+            <h1 className="text-xl font-black">Admin</h1>
+            <button onClick={() => setMobileMenuOpen(false)} className="p-2 -mr-2 text-white/50 hover:text-white">✕</button>
+          </div>
+          <p className="text-[10px] font-black uppercase tracking-[.25em] text-red-500">Solmart FC</p>
+          <h2 className="mt-1 text-2xl font-black">Dashboard</h2>
+          <div className="mt-6 pt-6 border-t border-white/10 text-sm">
+            <strong className="block truncate">{admin.firstName || admin.email}</strong>
+            <span className="text-xs text-white/50">{admin.role}</span>
           </div>
         </div>
-      </div>
-      <div className="mx-auto max-w-7xl px-5 py-6">
-        <div className="flex gap-2 overflow-x-auto pb-2">
-          {tabs.map((t) => (
-            <button
-              key={t}
-              onClick={() => setTab(t)}
-              className={`whitespace-nowrap rounded-full px-4 py-2 text-sm font-bold ${
-                tab === t ? "bg-red-600 text-white" : "border border-black/10 bg-white text-black/70 hover:bg-black/5"
-              }`}
-            >
-              {t}
+        
+        <nav className="flex-1 overflow-y-auto px-3 pb-6 space-y-1 custom-scrollbar">
+          {tabs.map((t) => {
+            const icons: any = {
+              Overview: <Home size={18} />,
+              Orders: <ShoppingCart size={18} />,
+              Products: <Package size={18} />,
+              Players: <Users size={18} />,
+              Teams: <Shield size={18} />,
+              Tournaments: <Trophy size={18} />,
+              Table: <ListOrdered size={18} />,
+              Matches: <Swords size={18} />,
+              Stats: <Activity size={18} />,
+              News: <Newspaper size={18} />,
+              Media: <Image size={18} />,
+              Sponsors: <Briefcase size={18} />,
+              Documents: <FileText size={18} />,
+              Settings: <Settings size={18} />,
+              Messages: <MessageSquare size={18} />,
+              Users: <Users size={18} />
+            };
+
+            return (
+              <button
+                key={t}
+                onClick={() => { setTab(t); setMobileMenuOpen(false); }}
+                className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-bold transition-all ${
+                  tab === t ? "bg-red-600 text-white shadow-lg shadow-red-600/20" : "text-white/60 hover:bg-white/10 hover:text-white"
+                }`}
+              >
+                {icons[t]} {t}
+              </button>
+            );
+          })}
+        </nav>
+      </aside>
+
+      {/* Main Content */}
+      <div className="flex-1 flex flex-col h-screen overflow-hidden relative">
+        <header className="bg-white border-b px-5 lg:px-8 py-4 flex items-center justify-between shrink-0 sticky top-0 z-20">
+          <div className="flex items-center gap-4">
+            <button onClick={() => setMobileMenuOpen(true)} className="p-2 -ml-2 text-black/50 hover:text-black lg:hidden">
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><line x1="4" x2="20" y1="12" y2="12"/><line x1="4" x2="20" y1="6" y2="6"/><line x1="4" x2="20" y1="18" y2="18"/></svg>
             </button>
-          ))}
-        </div>
-        
-        {loading && <p className="mt-4 text-sm text-black/50">Loading…</p>}
-        
-        <div className="mt-6">
-          {tab === "Overview" ? (
-            <OverviewTab metrics={overview} />
-          ) : tab === "Orders" ? (
-            <OrdersTab rows={data.orders || []} mutate={mutate} />
-          ) : tab === "Products" ? (
-            <ProductsTab rows={data.products || []} mutate={mutate} />
-          ) : tab === "Players" ? (
-            <PlayersTab rows={data.players || []} teams={data.teams || []} mutate={mutate} />
-          ) : tab === "Teams" ? (
-            <TeamsTab rows={data.teams || []} competitions={data.competitions || []} mutate={mutate} />
-          ) : tab === "Tournaments" ? (
-            <CompetitionsTab rows={data.competitions || []} teams={data.teams || []} mutate={mutate} />
-          ) : tab === "Table" ? (
-            <TableTab data={data as any} refresh={load} />
-          ) : tab === "Matches" ? (
-            <MatchesTab rows={data.matches || []} teams={data.teams || []} competitions={data.competitions || []} mutate={mutate} />
-          ) : tab === "Stats" ? (
-            <StatsTab rows={data.stats || []} players={data.players || []} mutate={mutate} />
-          ) : tab === "News" ? (
-            <NewsTab rows={data.articles || []} categories={data.categories || []} mutate={mutate} />
-          ) : tab === "Media" ? (
-            <MediaTab galleries={data.galleries || []} videos={data.videos || []} mutate={mutate} />
-          ) : tab === "Sponsors" ? (
-            <SponsorsTab rows={data.sponsors || []} mutate={mutate} />
-          ) : tab === "Documents" ? (
-            <DocumentsTab rows={data.documents || []} mutate={mutate} />
-          ) : tab === "Settings" ? (
-            <SettingsTab rows={data.settings || []} mutate={mutate} />
-          ) : tab === "Messages" ? (
-            <MessagesTab rows={data.messages || []} mutate={mutate} />
-          ) : (
-            <UsersTab rows={data.users || []} mutate={mutate} admin={admin} />
-          )}
+            <h2 className="text-xl font-black">{tab}</h2>
+          </div>
+          {loading && <div className="flex items-center gap-2 text-xs font-bold text-black/50"><div className="w-4 h-4 rounded-full border-2 border-black/20 border-t-black animate-spin" /> Loading</div>}
+        </header>
+
+        <div className="flex-1 overflow-y-auto p-5 lg:p-8 bg-zinc-50/50">
+          <div className="mx-auto max-w-6xl">
+            {tab === "Overview" ? (
+              <OverviewTab metrics={overview} />
+            ) : tab === "Orders" ? (
+              <OrdersTab rows={data.orders || []} mutate={mutate} />
+            ) : tab === "Products" ? (
+              <ProductsTab rows={data.products || []} mutate={mutate} />
+            ) : tab === "Players" ? (
+              <PlayersTab rows={data.players || []} teams={data.teams || []} mutate={mutate} />
+            ) : tab === "Teams" ? (
+              <TeamsTab rows={data.teams || []} competitions={data.competitions || []} mutate={mutate} />
+            ) : tab === "Tournaments" ? (
+              <CompetitionsTab rows={data.competitions || []} teams={data.teams || []} mutate={mutate} />
+            ) : tab === "Table" ? (
+              <TableTab data={data as any} refresh={load} />
+            ) : tab === "Matches" ? (
+              <MatchesTab rows={data.matches || []} teams={data.teams || []} competitions={data.competitions || []} mutate={mutate} />
+            ) : tab === "Stats" ? (
+              <StatsTab rows={data.stats || []} players={data.players || []} mutate={mutate} />
+            ) : tab === "News" ? (
+              <NewsTab rows={data.articles || []} categories={data.categories || []} mutate={mutate} />
+            ) : tab === "Media" ? (
+              <MediaTab galleries={data.galleries || []} videos={data.videos || []} mutate={mutate} />
+            ) : tab === "Sponsors" ? (
+              <SponsorsTab rows={data.sponsors || []} mutate={mutate} />
+            ) : tab === "Documents" ? (
+              <DocumentsTab rows={data.documents || []} mutate={mutate} />
+            ) : tab === "Settings" ? (
+              <SettingsTab rows={data.settings || []} mutate={mutate} />
+            ) : tab === "Messages" ? (
+              <MessagesTab rows={data.messages || []} mutate={mutate} />
+            ) : (
+              <UsersTab rows={data.users || []} mutate={mutate} admin={admin} />
+            )}
+          </div>
         </div>
       </div>
     </main>
