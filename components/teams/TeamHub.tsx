@@ -12,7 +12,7 @@ type TeamData = Team & {
   tableRows: (LeagueTable & { competition: any })[];
 };
 
-export function TeamHub({ team, fullTable = [] }: { team: TeamData, fullTable?: any[] }) {
+export function TeamHub({ team, fullTable = [], serverTime }: { team: TeamData, fullTable?: any[], serverTime?: number }) {
   const [tab, setTab] = useState<"OVERVIEW" | "MATCHES" | "TABLE" | "SQUAD" | "STATS" | "REPORTS">("OVERVIEW");
   const [season, setSeason] = useState("2025/26");
 
@@ -21,8 +21,9 @@ export function TeamHub({ team, fullTable = [] }: { team: TeamData, fullTable?: 
   const matches = [...team.homeMatches, ...team.awayMatches]
     .sort((a, b) => new Date(a.kickoffAt).getTime() - new Date(b.kickoffAt).getTime()) as any[];
     
-  const upcomingMatches = matches.filter(m => new Date(m.kickoffAt) >= new Date() && m.type !== "TRAINING").slice(0, 3);
-  const recentMatches = matches.filter(m => new Date(m.kickoffAt) < new Date() && m.type !== "TRAINING").reverse().slice(0, 3);
+  const now = serverTime || Date.now();
+  const upcomingMatches = matches.filter(m => new Date(m.kickoffAt).getTime() >= now && m.type !== "TRAINING").slice(0, 3);
+  const recentMatches = matches.filter(m => new Date(m.kickoffAt).getTime() < now && m.type !== "TRAINING").reverse().slice(0, 3);
 
   // Stats calculation for the chosen season
   const playerStats = team.players.map(p => ({
@@ -139,7 +140,7 @@ export function TeamHub({ team, fullTable = [] }: { team: TeamData, fullTable?: 
                   {upcomingMatches.length === 0 ? <p className="text-sm text-black/50">No upcoming matches scheduled.</p> : upcomingMatches.map((m: any) => (
                      <div key={m.id} className="text-sm border-b pb-3 last:border-0 last:pb-0">
                        <div className="font-bold">{m.homeTeamId === team.id ? team.name : m.homeTeam?.name || m.homeTeamId} vs {m.awayTeamId === team.id ? team.name : m.awayTeam?.name || m.awayTeamId}</div>
-                       <div className="text-black/50 mt-1">{new Date(m.kickoffAt).toLocaleString()}</div>
+                       <div className="text-black/50 mt-1" suppressHydrationWarning>{new Date(m.kickoffAt).toLocaleString()}</div>
                      </div>
                   ))}
                 </div>
@@ -317,7 +318,7 @@ export function TeamHub({ team, fullTable = [] }: { team: TeamData, fullTable?: 
           <div className="space-y-4 max-w-4xl mx-auto">
             {matches.filter(m => m.type === "MATCH").length === 0 ? <p className="text-black/50">No matches scheduled.</p> : matches.filter(m => m.type === "MATCH").map(m => (
               <Link href={`/matches/${m.id}`} key={m.id} className="block rounded-3xl bg-white p-6 shadow-sm ring-1 ring-black/5 hover:bg-zinc-50 transition-colors">
-                <div className="text-xs font-bold tracking-widest text-black/40 uppercase mb-4 text-center">
+                <div className="text-xs font-bold tracking-widest text-black/40 uppercase mb-4 text-center" suppressHydrationWarning>
                   {new Date(m.kickoffAt).toLocaleDateString(undefined, { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })}
                   <span className="mx-2">·</span>
                   {m.competition?.name || "Friendly"}
@@ -334,7 +335,7 @@ export function TeamHub({ team, fullTable = [] }: { team: TeamData, fullTable?: 
                       {m.homeScore}-{m.awayScore}
                     </div>
                   ) : (
-                    <div className="font-mono font-black bg-black/5 text-black px-4 py-2 rounded-xl text-xl">
+                    <div className="font-mono font-black bg-black/5 text-black px-4 py-2 rounded-xl text-xl" suppressHydrationWarning>
                       {new Date(m.kickoffAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
                     </div>
                   )}
@@ -393,7 +394,7 @@ export function TeamHub({ team, fullTable = [] }: { team: TeamData, fullTable?: 
           <div className="space-y-4 max-w-4xl mx-auto">
             {matches.filter(m => m.matchReport).length === 0 ? <p className="text-black/50">No match reports available.</p> : matches.filter(m => m.matchReport).reverse().map(m => (
               <Link href={`/matches/${m.id}`} key={m.id} className="block rounded-3xl bg-white p-6 shadow-sm ring-1 ring-black/5 hover:bg-zinc-50 transition-colors">
-                <div className="text-xs font-bold tracking-widest text-black/40 uppercase mb-2">
+                <div className="text-xs font-bold tracking-widest text-black/40 uppercase mb-2" suppressHydrationWarning>
                   {new Date(m.kickoffAt).toLocaleDateString(undefined, { year: 'numeric', month: 'long', day: 'numeric' })}
                   <span className="mx-2">·</span>
                   {m.competition?.name || "Friendly"}

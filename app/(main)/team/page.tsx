@@ -78,5 +78,7 @@ export default async function TeamPage() {
     });
   }
 
-  return <TeamHub team={team as any} fullTable={fullTable} />;
+  const serverTime = Date.now();
+
+  return <TeamHub team={team as any} fullTable={fullTable} serverTime={serverTime} />;
 }
