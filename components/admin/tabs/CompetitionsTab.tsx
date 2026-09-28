@@ -83,11 +83,11 @@ export function CompetitionsTab({ rows, teams, mutate }: { rows: (Competition & 
             <div className="grid gap-6 md:grid-cols-2">
               <div className="space-y-4">
                 <div>
-                  <label className="mb-1 block text-xs font-bold text-black/50">Name</label>
+                  <label className="mb-1 block text-xs font-bold uppercase tracking-wider text-black/50">Name</label>
                   <input className="w-full rounded-lg border p-2" value={r.name} onChange={e => update(r.id, "name", e.target.value)} />
                 </div>
                 <div>
-                  <label className="mb-1 block text-xs font-bold text-black/50">Season / Year</label>
+                  <label className="mb-1 block text-xs font-bold uppercase tracking-wider text-black/50">Season / Year</label>
                   <input className="w-full rounded-lg border p-2" value={r.season || ""} onChange={e => update(r.id, "season", e.target.value)} />
                 </div>
                 
@@ -108,7 +108,7 @@ export function CompetitionsTab({ rows, teams, mutate }: { rows: (Competition & 
               </div>
 
               <div>
-                <label className="mb-2 block text-xs font-bold text-black/50">Participating Teams</label>
+                <label className="mb-2 block text-xs font-bold uppercase tracking-wider text-black/50">Participating Teams</label>
                 <div className="h-48 overflow-y-auto rounded-lg border p-2 bg-zinc-50">
                   {teams.map(t => (
                     <label key={t.id} className="flex items-center gap-3 p-2 hover:bg-white rounded cursor-pointer">

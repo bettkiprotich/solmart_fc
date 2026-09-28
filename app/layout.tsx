@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
-import { Header } from "@/components/layout/header";
-import { Footer } from "@/components/layout/footer";
+import { HeaderWrapper } from "@/components/layout/header-wrapper";
+import { FooterWrapper } from "@/components/layout/footer-wrapper";
 import "./globals.css";
 
 export const metadata: Metadata = {
@@ -18,9 +18,9 @@ export default function RootLayout({ children }: Readonly<{ children: React.Reac
   return (
     <html lang="en">
       <body className="min-h-screen antialiased"><a href="#main-content" className="skip-link">Skip to content</a>
-        <Header />
+        <HeaderWrapper />
         <main id="main-content">{children}</main>
-        <Footer />
+        <FooterWrapper />
       </body>
     </html>
   );

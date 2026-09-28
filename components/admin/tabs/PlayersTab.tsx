@@ -52,41 +52,65 @@ export function PlayersTab({ rows, teams, mutate }: { rows: AnyRecord[]; teams: 
       <div className={cardClass}>
         <h2 className="text-xl font-black">Squad management</h2>
         <p className="mt-1 text-sm text-black/50">{editing ? "Edit the player details below." : "Add a player and upload their actual squad photograph."}</p>
-        <form className="mt-4 grid gap-3 md:grid-cols-2" onSubmit={save}>
-          <input className={inputClass} placeholder="First name" required value={p.firstName} onChange={(e) => setP({ ...p, firstName: e.target.value })} />
-          <input className={inputClass} placeholder="Last name" required value={p.lastName} onChange={(e) => setP({ ...p, lastName: e.target.value })} />
-          <div className="rounded-xl bg-neutral-50 px-3 py-2.5 text-sm text-black/60">
+        <form className="mt-4 grid gap-4 md:grid-cols-2" onSubmit={save}>
+          <div>
+            <label className="mb-1 block text-xs font-bold uppercase tracking-wider text-black/50">First name</label>
+            <input className={inputClass} placeholder="First name" required value={p.firstName} onChange={(e) => setP({ ...p, firstName: e.target.value })} />
+          </div>
+          <div>
+            <label className="mb-1 block text-xs font-bold uppercase tracking-wider text-black/50">Last name</label>
+            <input className={inputClass} placeholder="Last name" required value={p.lastName} onChange={(e) => setP({ ...p, lastName: e.target.value })} />
+          </div>
+          <div className="md:col-span-2 rounded-xl bg-neutral-50 px-3 py-2.5 text-sm text-black/60">
             <span className="font-black text-black/70">URL preview:</span> <span className="font-mono">/team/{slugPreview(`${p.firstName} ${p.lastName}`)}</span>
           </div>
-          <select className={inputClass} value={p.position} onChange={(e) => setP({ ...p, position: e.target.value })}>
-            {["GOALKEEPER", "DEFENDER", "MIDFIELDER", "FORWARD"].map((x) => (
-              <option key={x}>{x}</option>
-            ))}
-          </select>
-          <input className={inputClass} placeholder="Squad number" type="number" min="0" max="99" value={p.squadNumber} onChange={(e) => setP({ ...p, squadNumber: e.target.value })} />
-          <select className={inputClass} value={p.teamId} onChange={(e) => setP({ ...p, teamId: e.target.value })}>
-            <option value="">Unassigned</option>
-            {teams.map((t) => (
-              <option key={t.id} value={t.id}>
-                {t.name}
-              </option>
-            ))}
-          </select>
-          <input className={inputClass} placeholder="Nationality" value={p.nationality} onChange={(e) => setP({ ...p, nationality: e.target.value })} />
-          <textarea className={inputClass + " md:col-span-2"} placeholder="Player biography" value={p.bio} onChange={(e) => setP({ ...p, bio: e.target.value })} />
-          <label className="md:col-span-2 rounded-xl border-2 border-dashed border-black/10 p-4 text-sm font-bold">
-            Player photograph
-            <input className="mt-2 block w-full text-sm" type="file" accept="image/jpeg,image/png,image/webp,image/gif" required={!editing} onChange={(e) => setFile(e.target.files?.[0] || null)} />
-            {editing?.photoUrl && <span className="mt-2 block text-xs font-normal text-black/50">Current photo will remain if no replacement is selected.</span>}
-          </label>
-          <div className="flex gap-2 md:col-span-2">
-            <button disabled={busy} className="rounded-xl bg-red-600 px-4 py-3 font-black text-white disabled:opacity-50">
+          <div>
+            <label className="mb-1 block text-xs font-bold uppercase tracking-wider text-black/50">Position</label>
+            <select className={inputClass} value={p.position} onChange={(e) => setP({ ...p, position: e.target.value })}>
+              {["GOALKEEPER", "DEFENDER", "MIDFIELDER", "FORWARD"].map((x) => (
+                <option key={x}>{x}</option>
+              ))}
+            </select>
+          </div>
+          <div>
+            <label className="mb-1 block text-xs font-bold uppercase tracking-wider text-black/50">Squad number</label>
+            <input className={inputClass} placeholder="Squad number" type="number" min="0" max="99" value={p.squadNumber} onChange={(e) => setP({ ...p, squadNumber: e.target.value })} />
+          </div>
+          <div>
+            <label className="mb-1 block text-xs font-bold uppercase tracking-wider text-black/50">Team</label>
+            <select className={inputClass} value={p.teamId} onChange={(e) => setP({ ...p, teamId: e.target.value })}>
+              <option value="">Unassigned</option>
+              {teams.map((t) => (
+                <option key={t.id} value={t.id}>
+                  {t.name}
+                </option>
+              ))}
+            </select>
+          </div>
+          <div>
+            <label className="mb-1 block text-xs font-bold uppercase tracking-wider text-black/50">Nationality</label>
+            <input className={inputClass} placeholder="Nationality" value={p.nationality} onChange={(e) => setP({ ...p, nationality: e.target.value })} />
+          </div>
+          <div className="md:col-span-2">
+            <label className="mb-1 block text-xs font-bold uppercase tracking-wider text-black/50">Biography</label>
+            <textarea className={inputClass + " min-h-[100px]"} placeholder="Player biography" value={p.bio} onChange={(e) => setP({ ...p, bio: e.target.value })} />
+          </div>
+          <div className="md:col-span-2">
+            <label className="mb-1 block text-xs font-bold uppercase tracking-wider text-black/50">Photograph</label>
+            <label className="block rounded-xl border-2 border-dashed border-black/10 p-4 text-sm font-bold cursor-pointer hover:bg-black/5 transition-colors">
+              {file ? "File selected" : "Click to select player photograph"}
+              <input className="mt-2 block w-full text-sm" type="file" accept="image/jpeg,image/png,image/webp,image/gif" required={!editing} onChange={(e) => setFile(e.target.files?.[0] || null)} />
+              {editing?.photoUrl && <span className="mt-2 block text-xs font-normal text-black/50">Current photo will remain if no replacement is selected.</span>}
+            </label>
+          </div>
+          <div className="flex gap-2 md:col-span-2 mt-2">
+            <button disabled={busy} className="rounded-xl bg-red-600 px-5 py-3 font-black text-white disabled:opacity-50">
               {busy ? "Saving…" : editing ? "Save player changes" : "Add player"}
             </button>
             {editing && (
               <button
                 type="button"
-                className="rounded-xl border px-4 py-3 font-black"
+                className="rounded-xl border px-5 py-3 font-black text-black/60 hover:bg-black/5"
                 onClick={() => {
                   setEditing(null);
                   setP(blank);

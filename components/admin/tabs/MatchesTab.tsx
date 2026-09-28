@@ -76,89 +76,141 @@ export function MatchesTab({ rows, teams, competitions, mutate }: { rows: AnyRec
       <div className={cardClass}>
         <h2 className="text-xl font-black">Fixtures & results</h2>
         <p className="mt-1 text-sm text-black/50">Type team and competition names directly. Existing teams and competitions are suggested.</p>
-        <form className="mt-4 grid gap-3 md:grid-cols-2" onSubmit={save}>
-          <div>
-            <label className="mb-1 block text-xs font-bold uppercase tracking-wider text-black/50">Home team</label>
-            <input className={inputClass} required list="team-names" placeholder="Home team" value={m.homeTeamName} onChange={(e) => setM({ ...m, homeTeamName: e.target.value })} />
-            <div className="mt-2 flex items-center gap-4">
-              <label className="rounded-xl border-2 border-dashed border-black/10 p-3 text-sm font-bold flex-1 cursor-pointer hover:bg-black/5 transition-colors">
-                {uploading === "home" ? "Uploading…" : "Upload home logo"}
-                <input
-                  className="hidden"
-                  type="file"
-                  accept="image/jpeg,image/png,image/webp,image/gif"
-                  disabled={!!uploading}
-                  onChange={(e) => {
-                    const f = e.target.files?.[0];
-                    if (f) setLogo("home", f);
-                    e.currentTarget.value = "";
-                  }}
-                />
-              </label>
-              {m.homeTeamLogoUrl && <Image src={m.homeTeamLogoUrl} alt="Home team logo preview" width={48} height={48} className="size-12 rounded-full object-contain bg-zinc-50 border p-1" />}
+        <form className="mt-4 flex flex-col gap-5" onSubmit={save}>
+          <div className="grid gap-4 md:grid-cols-2">
+            <div className="rounded-xl border border-black/10 p-4 bg-zinc-50/50">
+              <h3 className="mb-3 text-sm font-black uppercase tracking-wider">Home Team</h3>
+              <div className="space-y-3">
+                <div>
+                  <label className="mb-1 block text-xs font-bold uppercase tracking-wider text-black/50">Team Name</label>
+                  <input className={inputClass} required list="team-names" placeholder="Home team" value={m.homeTeamName} onChange={(e) => setM({ ...m, homeTeamName: e.target.value })} />
+                </div>
+                <div>
+                  <label className="mb-1 block text-xs font-bold uppercase tracking-wider text-black/50">Logo</label>
+                  <div className="flex items-center gap-4">
+                    <label className="rounded-xl border-2 border-dashed border-black/10 p-3 text-sm font-bold flex-1 cursor-pointer hover:bg-black/5 transition-colors text-center">
+                      {uploading === "home" ? "Uploading…" : "Upload home logo"}
+                      <input
+                        className="hidden"
+                        type="file"
+                        accept="image/jpeg,image/png,image/webp,image/gif"
+                        disabled={!!uploading}
+                        onChange={(e) => {
+                          const f = e.target.files?.[0];
+                          if (f) setLogo("home", f);
+                          e.currentTarget.value = "";
+                        }}
+                      />
+                    </label>
+                    {m.homeTeamLogoUrl && <Image src={m.homeTeamLogoUrl} alt="Home team logo preview" width={48} height={48} className="size-12 rounded-full object-contain bg-zinc-50 border p-1" />}
+                  </div>
+                </div>
+                {m.status === "COMPLETED" && (
+                  <div>
+                    <label className="mb-1 block text-xs font-bold uppercase tracking-wider text-black/50">Goals Scored</label>
+                    <input className={inputClass} type="number" min="0" placeholder="Home score" value={m.homeScore} onChange={(e) => setM({ ...m, homeScore: e.target.value })} />
+                  </div>
+                )}
+              </div>
+            </div>
+
+            <div className="rounded-xl border border-black/10 p-4 bg-zinc-50/50">
+              <h3 className="mb-3 text-sm font-black uppercase tracking-wider">Away Team</h3>
+              <div className="space-y-3">
+                <div>
+                  <label className="mb-1 block text-xs font-bold uppercase tracking-wider text-black/50">Team Name</label>
+                  <input className={inputClass} required list="team-names" placeholder="Away team" value={m.awayTeamName} onChange={(e) => setM({ ...m, awayTeamName: e.target.value })} />
+                </div>
+                <div>
+                  <label className="mb-1 block text-xs font-bold uppercase tracking-wider text-black/50">Logo</label>
+                  <div className="flex items-center gap-4">
+                    <label className="rounded-xl border-2 border-dashed border-black/10 p-3 text-sm font-bold flex-1 cursor-pointer hover:bg-black/5 transition-colors text-center">
+                      {uploading === "away" ? "Uploading…" : "Upload away logo"}
+                      <input
+                        className="hidden"
+                        type="file"
+                        accept="image/jpeg,image/png,image/webp,image/gif"
+                        disabled={!!uploading}
+                        onChange={(e) => {
+                          const f = e.target.files?.[0];
+                          if (f) setLogo("away", f);
+                          e.currentTarget.value = "";
+                        }}
+                      />
+                    </label>
+                    {m.awayTeamLogoUrl && <Image src={m.awayTeamLogoUrl} alt="Away team logo preview" width={48} height={48} className="size-12 rounded-full object-contain bg-zinc-50 border p-1" />}
+                  </div>
+                </div>
+                {m.status === "COMPLETED" && (
+                  <div>
+                    <label className="mb-1 block text-xs font-bold uppercase tracking-wider text-black/50">Goals Scored</label>
+                    <input className={inputClass} type="number" min="0" placeholder="Away score" value={m.awayScore} onChange={(e) => setM({ ...m, awayScore: e.target.value })} />
+                  </div>
+                )}
+              </div>
             </div>
           </div>
-          <div>
-            <label className="mb-1 block text-xs font-bold uppercase tracking-wider text-black/50">Away team</label>
-            <input className={inputClass} required list="team-names" placeholder="Away team" value={m.awayTeamName} onChange={(e) => setM({ ...m, awayTeamName: e.target.value })} />
-            <div className="mt-2 flex items-center gap-4">
-              <label className="rounded-xl border-2 border-dashed border-black/10 p-3 text-sm font-bold flex-1 cursor-pointer hover:bg-black/5 transition-colors">
-                {uploading === "away" ? "Uploading…" : "Upload away logo"}
-                <input
-                  className="hidden"
-                  type="file"
-                  accept="image/jpeg,image/png,image/webp,image/gif"
-                  disabled={!!uploading}
-                  onChange={(e) => {
-                    const f = e.target.files?.[0];
-                    if (f) setLogo("away", f);
-                    e.currentTarget.value = "";
-                  }}
-                />
-              </label>
-              {m.awayTeamLogoUrl && <Image src={m.awayTeamLogoUrl} alt="Away team logo preview" width={48} height={48} className="size-12 rounded-full object-contain bg-zinc-50 border p-1" />}
-            </div>
-          </div>
+
           <datalist id="team-names">
             {teams.map((t) => (
               <option key={t.id} value={t.name} />
             ))}
           </datalist>
-          <div>
-            <label className="mb-1 block text-xs font-bold uppercase tracking-wider text-black/50">Competition</label>
-            <input className={inputClass} list="competition-names" placeholder="Competition (optional)" value={m.competitionName} onChange={(e) => setM({ ...m, competitionName: e.target.value })} />
-            <datalist id="competition-names">
-              {competitions.map((c) => (
-                <option key={c.id} value={c.name} />
-              ))}
-            </datalist>
+
+          <div className="grid gap-3 md:grid-cols-2">
+            <div>
+              <label className="mb-1 block text-xs font-bold uppercase tracking-wider text-black/50">Competition</label>
+              <input className={inputClass} list="competition-names" placeholder="Competition (optional)" value={m.competitionName} onChange={(e) => setM({ ...m, competitionName: e.target.value })} />
+              <datalist id="competition-names">
+                {competitions.map((c) => (
+                  <option key={c.id} value={c.name} />
+                ))}
+              </datalist>
+            </div>
+            <div>
+              <label className="mb-1 block text-xs font-bold uppercase tracking-wider text-black/50">Match Type</label>
+              <select className={inputClass} value={m.type} onChange={(e) => setM({ ...m, type: e.target.value })}>
+                {["MATCH", "TRAINING"].map((s) => (
+                  <option key={s}>{s}</option>
+                ))}
+              </select>
+            </div>
+            <div>
+              <label className="mb-1 block text-xs font-bold uppercase tracking-wider text-black/50">Kickoff Time</label>
+              <input className={inputClass} type="datetime-local" required value={m.kickoffAt} onChange={(e) => setM({ ...m, kickoffAt: e.target.value })} />
+            </div>
+            <div>
+              <label className="mb-1 block text-xs font-bold uppercase tracking-wider text-black/50">Venue</label>
+              <input className={inputClass} placeholder="Venue" value={m.venue} onChange={(e) => setM({ ...m, venue: e.target.value })} />
+            </div>
+            <div>
+              <label className="mb-1 block text-xs font-bold uppercase tracking-wider text-black/50">Status</label>
+              <select className={inputClass} value={m.status} onChange={(e) => setM({ ...m, status: e.target.value })}>
+                {["SCHEDULED", "POSTPONED", "CANCELLED", "COMPLETED"].map((s) => (
+                  <option key={s}>{s}</option>
+                ))}
+              </select>
+            </div>
+            {m.status === "COMPLETED" && (
+              <div>
+                <label className="mb-1 block text-xs font-bold uppercase tracking-wider text-black/50">Attendance</label>
+                <input className={inputClass} type="number" min="0" placeholder="Attendance" value={m.attendance} onChange={(e) => setM({ ...m, attendance: e.target.value })} />
+              </div>
+            )}
+            {m.status === "COMPLETED" && (
+              <div className="md:col-span-2">
+                <label className="mb-1 block text-xs font-bold uppercase tracking-wider text-black/50">Match Report</label>
+                <textarea className={inputClass + " min-h-[100px]"} placeholder="Match report" value={m.matchReport} onChange={(e) => setM({ ...m, matchReport: e.target.value })} />
+              </div>
+            )}
           </div>
-          <select className={inputClass} value={m.type} onChange={(e) => setM({ ...m, type: e.target.value })}>
-            {["MATCH", "TRAINING"].map((s) => (
-              <option key={s}>{s}</option>
-            ))}
-          </select>
-          <input className={inputClass} type="datetime-local" required value={m.kickoffAt} onChange={(e) => setM({ ...m, kickoffAt: e.target.value })} />
-          <input className={inputClass} placeholder="Venue" value={m.venue} onChange={(e) => setM({ ...m, venue: e.target.value })} />
-          <select className={inputClass} value={m.status} onChange={(e) => setM({ ...m, status: e.target.value })}>
-            {["SCHEDULED", "POSTPONED", "CANCELLED", "COMPLETED"].map((s) => (
-              <option key={s}>{s}</option>
-            ))}
-          </select>
-          {m.status === "COMPLETED" && (
-            <>
-              <input className={inputClass} type="number" min="0" placeholder="Home score" value={m.homeScore} onChange={(e) => setM({ ...m, homeScore: e.target.value })} />
-              <input className={inputClass} type="number" min="0" placeholder="Away score" value={m.awayScore} onChange={(e) => setM({ ...m, awayScore: e.target.value })} />
-              <input className={inputClass} type="number" min="0" placeholder="Attendance" value={m.attendance} onChange={(e) => setM({ ...m, attendance: e.target.value })} />
-              <textarea className={inputClass + " md:col-span-2"} placeholder="Match report" value={m.matchReport} onChange={(e) => setM({ ...m, matchReport: e.target.value })} />
-            </>
-          )}
-          <div className="flex gap-2 md:col-span-2">
-            <button className="rounded-xl bg-red-600 px-4 py-3 font-black text-white">{editing ? "Save fixture changes" : "Create fixture"}</button>
+
+          <div className="flex gap-2">
+            <button className="rounded-xl bg-red-600 px-5 py-3 font-black text-white">{editing ? "Save fixture changes" : "Create fixture"}</button>
             {editing && (
               <button
                 type="button"
-                className="rounded-xl border px-4 py-3 font-black"
+                className="rounded-xl border px-5 py-3 font-black text-black/60 hover:bg-black/5"
                 onClick={() => {
                   setEditing(null);
                   setM(blank);

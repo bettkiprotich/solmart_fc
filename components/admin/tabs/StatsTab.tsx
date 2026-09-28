@@ -67,33 +67,57 @@ export function StatsTab({ rows, players, mutate }: { rows: AnyRecord[]; players
           </div>
         </div>
         
-        <div className="mt-4 overflow-x-auto">
+        <div className="mt-6 rounded-xl border border-black/10 bg-zinc-50 p-4">
+          <p className="text-xs font-bold uppercase tracking-wider text-black/50 mb-2">Column Key</p>
+          <div className="flex flex-wrap gap-x-6 gap-y-2 text-xs">
+            <span><b>A</b>: Appearances</span>
+            <span><b>ON</b>: Sub On</span>
+            <span><b>Off</b>: Sub Off</span>
+            <span><b>G</b>: Goals</span>
+            <span><b>P</b>: Penalties</span>
+            <span><b>PM</b>: Penalties Missed</span>
+            <span><b>Ass</b>: Assists</span>
+            <span><b>OG</b>: Own Goals</span>
+            <span><b>YC</b>: Yellow Cards</span>
+            <span><b>RC</b>: Red Cards</span>
+            <span><b>CS</b>: Clean Sheets</span>
+          </div>
+        </div>
+        
+        <div className="mt-4 overflow-x-auto max-h-[600px] border border-black/10 rounded-xl relative">
           <table className="w-full text-left text-sm whitespace-nowrap">
-            <thead>
-              <tr className="border-b text-black/50">
-                <th className="pb-3 pr-4 font-bold">Player</th>
-                <th className="pb-3 px-2 font-bold" title="Appearances">A</th>
-                <th className="pb-3 px-2 font-bold" title="Sub On">ON</th>
-                <th className="pb-3 px-2 font-bold" title="Sub Off">Off</th>
-                <th className="pb-3 px-2 font-bold" title="Goals">G</th>
-                <th className="pb-3 px-2 font-bold" title="Penalties">P</th>
-                <th className="pb-3 px-2 font-bold" title="Penalties Missed">PM</th>
-                <th className="pb-3 px-2 font-bold" title="Assists">Ass</th>
-                <th className="pb-3 px-2 font-bold" title="Own Goals">OG</th>
-                <th className="pb-3 px-2 font-bold" title="Yellow Cards">YC</th>
-                <th className="pb-3 px-2 font-bold" title="Red Cards">RC</th>
-                <th className="pb-3 px-2 font-bold" title="Clean Sheets">CS</th>
+            <thead className="sticky top-0 bg-white shadow-sm z-10">
+              <tr className="text-black/50">
+                <th className="py-3 px-4 font-bold border-b">Player</th>
+                <th className="py-3 px-2 font-bold border-b" title="Appearances">A</th>
+                <th className="py-3 px-2 font-bold border-b" title="Sub On">ON</th>
+                <th className="py-3 px-2 font-bold border-b" title="Sub Off">Off</th>
+                <th className="py-3 px-2 font-bold border-b" title="Goals">G</th>
+                <th className="py-3 px-2 font-bold border-b" title="Penalties">P</th>
+                <th className="py-3 px-2 font-bold border-b" title="Penalties Missed">PM</th>
+                <th className="py-3 px-2 font-bold border-b" title="Assists">Ass</th>
+                <th className="py-3 px-2 font-bold border-b" title="Own Goals">OG</th>
+                <th className="py-3 px-2 font-bold border-b" title="Yellow Cards">YC</th>
+                <th className="py-3 px-2 font-bold border-b" title="Red Cards">RC</th>
+                <th className="py-3 px-2 font-bold border-b" title="Clean Sheets">CS</th>
               </tr>
             </thead>
             <tbody className="divide-y">
               {players.map((p) => {
                 const s = stats[p.id];
                 if (!s) return null;
+                
+                const titles = {
+                  appearances: "Appearances", subOn: "Sub On", subOff: "Sub Off", goals: "Goals",
+                  penalties: "Penalties", penaltiesMissed: "Penalties Missed", assists: "Assists",
+                  ownGoals: "Own Goals", yellowCards: "Yellow Cards", redCards: "Red Cards", cleanSheets: "Clean Sheets"
+                };
+
                 return (
-                  <tr key={p.id}>
-                    <td className="py-2 pr-4">
+                  <tr key={p.id} className="hover:bg-zinc-50/50">
+                    <td className="py-2 px-4">
                       <div className="flex items-center gap-3">
-                        <div className="h-8 w-8 overflow-hidden rounded-full bg-zinc-100">
+                        <div className="h-8 w-8 overflow-hidden rounded-full bg-zinc-200">
                           {p.photoUrl && <Image src={p.photoUrl} alt={p.lastName} width={32} height={32} className="object-cover h-full w-full" />}
                         </div>
                         <div>
@@ -102,12 +126,13 @@ export function StatsTab({ rows, players, mutate }: { rows: AnyRecord[]; players
                         </div>
                       </div>
                     </td>
-                    {["appearances", "subOn", "subOff", "goals", "penalties", "penaltiesMissed", "assists", "ownGoals", "yellowCards", "redCards", "cleanSheets"].map((field) => (
+                    {(Object.keys(titles) as Array<keyof typeof titles>).map((field) => (
                       <td key={field} className="px-1 py-2">
                         <input
                           type="number"
                           min="0"
-                          className="w-12 rounded border px-2 py-1 text-center text-xs"
+                          title={`${titles[field]} for ${p.lastName}`}
+                          className="w-12 rounded border px-2 py-1 text-center text-xs outline-none focus:border-red-500 hover:border-black/30 transition-colors"
                           value={s[field]}
                           onChange={(e) => updateField(p.id, field, e.target.value)}
                         />

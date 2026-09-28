@@ -46,28 +46,43 @@ export function TeamsTab({ rows, competitions, mutate }: { rows: AnyRecord[]; co
     <div className="space-y-5">
       <div className={cardClass}>
         <h2 className="text-xl font-black">Team Profiles</h2>
-        <form className="mt-4 grid gap-3 md:grid-cols-2" onSubmit={save}>
-          <input className={inputClass} placeholder="Full Team Name" required value={t.name} onChange={(e) => setT({ ...t, name: e.target.value })} />
-          <input className={inputClass} placeholder="Short Name" value={t.shortName} onChange={(e) => setT({ ...t, shortName: e.target.value })} />
-          <textarea className={inputClass + " md:col-span-2"} placeholder="Team Intro / Blurb" value={t.blurb} onChange={(e) => setT({ ...t, blurb: e.target.value })} />
+        <form className="mt-4 grid gap-4 md:grid-cols-2" onSubmit={save}>
+          <div>
+            <label className="mb-1 block text-xs font-bold uppercase tracking-wider text-black/50">Full Team Name</label>
+            <input className={inputClass} placeholder="Full Team Name" required value={t.name} onChange={(e) => setT({ ...t, name: e.target.value })} />
+          </div>
+          <div>
+            <label className="mb-1 block text-xs font-bold uppercase tracking-wider text-black/50">Short Name</label>
+            <input className={inputClass} placeholder="Short Name" value={t.shortName} onChange={(e) => setT({ ...t, shortName: e.target.value })} />
+          </div>
+          <div className="md:col-span-2">
+            <label className="mb-1 block text-xs font-bold uppercase tracking-wider text-black/50">Team Intro / Blurb</label>
+            <textarea className={inputClass + " min-h-[100px]"} placeholder="Team Intro / Blurb" value={t.blurb} onChange={(e) => setT({ ...t, blurb: e.target.value })} />
+          </div>
           
-          <label className="rounded-xl border-2 border-dashed border-black/10 p-4 text-sm font-bold">
-            Team Logo
-            <input className="mt-2 block w-full text-sm" type="file" accept="image/*" onChange={(e) => setLogoFile(e.target.files?.[0] || null)} />
-          </label>
-          <label className="rounded-xl border-2 border-dashed border-black/10 p-4 text-sm font-bold">
-            Cover Photo
-            <input className="mt-2 block w-full text-sm" type="file" accept="image/*" onChange={(e) => setCoverFile(e.target.files?.[0] || null)} />
-          </label>
+          <div>
+            <label className="mb-1 block text-xs font-bold uppercase tracking-wider text-black/50">Team Logo</label>
+            <label className="block rounded-xl border-2 border-dashed border-black/10 p-4 text-sm font-bold cursor-pointer hover:bg-black/5 transition-colors">
+              {logoFile ? "File selected" : "Click to select logo"}
+              <input className="mt-2 block w-full text-sm" type="file" accept="image/*" onChange={(e) => setLogoFile(e.target.files?.[0] || null)} />
+            </label>
+          </div>
+          <div>
+            <label className="mb-1 block text-xs font-bold uppercase tracking-wider text-black/50">Cover Photo</label>
+            <label className="block rounded-xl border-2 border-dashed border-black/10 p-4 text-sm font-bold cursor-pointer hover:bg-black/5 transition-colors">
+              {coverFile ? "File selected" : "Click to select cover"}
+              <input className="mt-2 block w-full text-sm" type="file" accept="image/*" onChange={(e) => setCoverFile(e.target.files?.[0] || null)} />
+            </label>
+          </div>
 
-
-          <div className="md:col-span-2 rounded-xl border p-4 bg-zinc-50">
-            <label className="text-sm font-bold block mb-2">Participating Tournaments</label>
-            <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-2">
+          <div className="md:col-span-2 rounded-xl border p-4 bg-zinc-50/50 mt-2">
+            <label className="text-xs font-bold uppercase tracking-wider text-black/50 block mb-3">Participating Tournaments</label>
+            <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-3">
               {competitions.map(c => (
-                <label key={c.id} className="flex items-center gap-2 cursor-pointer text-sm">
+                <label key={c.id} className="flex items-center gap-3 cursor-pointer text-sm p-2 rounded-lg hover:bg-black/5 transition-colors border bg-white">
                   <input
                     type="checkbox"
+                    className="size-4"
                     checked={t.competitionIds?.includes(c.id)}
                     onChange={(e) => {
                       if (e.target.checked) {
@@ -83,12 +98,12 @@ export function TeamsTab({ rows, competitions, mutate }: { rows: AnyRecord[]; co
             </div>
           </div>
 
-          <div className="flex gap-2 md:col-span-2">
-            <button disabled={busy} className="rounded-xl bg-red-600 px-4 py-3 font-black text-white disabled:opacity-50">
+          <div className="flex gap-2 md:col-span-2 mt-2">
+            <button disabled={busy} className="rounded-xl bg-red-600 px-5 py-3 font-black text-white disabled:opacity-50">
               {busy ? "Saving..." : editing ? "Save Team" : "Add Team"}
             </button>
             {editing && (
-              <button type="button" className="rounded-xl border px-4 py-3 font-black" onClick={() => { setEditing(null); setT(blank); }}>
+              <button type="button" className="rounded-xl border px-5 py-3 font-black text-black/60 hover:bg-black/5" onClick={() => { setEditing(null); setT(blank); }}>
                 Cancel
               </button>
             )}
