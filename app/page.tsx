@@ -46,7 +46,7 @@ export default async function HomePage() {
   
   let form: string[] = [];
   if (clubTeam) {
-    const clubPast = pastMatches.filter(m => m.homeTeamId === clubTeam.id || m.awayTeamId === clubTeam.id).slice(0, 6).reverse(); // Reverse so oldest is first, or keep newest first? Form is usually Left=Old, Right=New
+    const clubPast = pastMatches.filter(m => m.homeTeamId === clubTeam.id || m.awayTeamId === clubTeam.id).slice(0, 6).reverse();
     form = clubPast.map(m => {
       const isHome = m.homeTeamId === clubTeam.id;
       const ourScore = isHome ? m.homeScore : m.awayScore;
@@ -57,6 +57,20 @@ export default async function HomePage() {
       return "D";
     });
   }
+
+  // Fetch recent media
+  const recentGalleries = await prisma.gallery.findMany({
+    where: { published: true },
+    include: { images: true },
+    orderBy: { createdAt: "desc" },
+    take: 2
+  });
+  
+  const recentVideos = await prisma.video.findMany({
+    where: { published: true },
+    orderBy: { createdAt: "desc" },
+    take: 1
+  });
 
   return (
     <div>
@@ -108,15 +122,63 @@ export default async function HomePage() {
 
           <div className="space-y-6">
             {/* Form Widget */}
-            <div className="rounded-[2rem] border border-zinc-200 bg-white p-6 shadow-sm">
-              <h3 className="text-sm font-black uppercase tracking-widest text-black/40 mb-4">Current Form</h3>
-              <div className="flex gap-2">
-                {form.length > 0 ? form.map((f, i) => (
-                  <div key={i} className={`flex size-10 items-center justify-center rounded-lg font-black text-white ${f === 'W' ? 'bg-green-500' : f === 'L' ? 'bg-red-500' : 'bg-zinc-400'}`}>
-                    {f}
-                  </div>
-                )) : <span className="text-zinc-500 text-sm">Not enough data.</span>}
-              </div>
+            <div className="rounded-[2rem] border border-zinc-200 bg-white p-8 shadow-sm">
+              <h3 className="text-xl font-black mb-6 text-center">Matches Summary</h3>
+              
+              {clubTeam && pastMatches.length > 0 ? (() => {
+                const clubMatches = pastMatches.filter(m => m.homeTeamId === clubTeam.id || m.awayTeamId === clubTeam.id);
+                const played = clubMatches.length;
+                const won = clubMatches.filter(m => (m.homeTeamId === clubTeam.id && m.homeScore! > m.awayScore!) || (m.awayTeamId === clubTeam.id && m.awayScore! > m.homeScore!)).length;
+                const lost = clubMatches.filter(m => (m.homeTeamId === clubTeam.id && m.homeScore! < m.awayScore!) || (m.awayTeamId === clubTeam.id && m.awayScore! < m.homeScore!)).length;
+                const drawn = played - won - lost;
+                const ppg = played > 0 ? ((won * 3 + drawn) / played).toFixed(1) : "0.0";
+                
+                return (
+                  <>
+                    <div className="flex justify-between text-center mb-6">
+                      <div>
+                        <div className="text-zinc-500 font-medium text-sm mb-1">Played</div>
+                        <div className="text-3xl font-black">{played}</div>
+                      </div>
+                      <div>
+                        <div className="text-zinc-500 font-medium text-sm mb-1">Won</div>
+                        <div className="text-3xl font-black">{won}</div>
+                        <div className="h-1 bg-[#10b981] mt-2 rounded"></div>
+                      </div>
+                      <div>
+                        <div className="text-zinc-500 font-medium text-sm mb-1">Drawn</div>
+                        <div className="text-3xl font-black">{drawn}</div>
+                        <div className="h-1 bg-zinc-300 mt-2 rounded"></div>
+                      </div>
+                      <div>
+                        <div className="text-zinc-500 font-medium text-sm mb-1">Lost</div>
+                        <div className="text-3xl font-black">{lost}</div>
+                        <div className="h-1 bg-[#f43f5e] mt-2 rounded"></div>
+                      </div>
+                    </div>
+                    
+                    <div className="h-3 w-full rounded-full flex overflow-hidden mb-8 bg-zinc-100">
+                      <div style={{width: `${(won/played)*100}%`}} className="bg-[#10b981]"></div>
+                      <div style={{width: `${(drawn/played)*100}%`}} className="bg-zinc-300"></div>
+                      <div style={{width: `${(lost/played)*100}%`}} className="bg-[#f43f5e]"></div>
+                    </div>
+
+                    <h3 className="text-lg font-black mb-4 text-center">Form</h3>
+                    <div className="flex justify-center gap-2 mb-6">
+                      {form.length > 0 ? form.map((f, i) => (
+                        <div key={i} className={`flex h-10 w-10 items-center justify-center rounded-lg font-black ${f==='W'?'bg-[#10b981] text-white':f==='L'?'bg-[#f43f5e] text-white':'bg-zinc-300 text-zinc-600'}`}>
+                          {f}
+                        </div>
+                      )) : <span className="text-zinc-500 text-sm">Not enough data.</span>}
+                    </div>
+                    <div className="text-center text-zinc-600 font-medium">
+                      Average PPG <span className="font-black text-black ml-1">{ppg}</span>
+                    </div>
+                  </>
+                );
+              })() : (
+                <div className="text-center text-zinc-500 py-4">Not enough data available.</div>
+              )}
             </div>
 
             {/* League Table Widget */}
@@ -181,6 +243,62 @@ export default async function HomePage() {
           <div className="grid gap-5 sm:grid-cols-2">
             {products.slice(0, 2).map(p => <ProductCard key={p.id} product={p} />)}
           </div>
+        </div>
+      </section>
+
+      {/* MEDIA SECTION */}
+      <section className="mx-auto max-w-7xl px-5 py-16 lg:px-8">
+        <SectionHeading eyebrow="Media" title="Photos & Videos" href="/media" linkLabel="View gallery" />
+        <div className="mt-7 grid gap-5 md:grid-cols-3">
+          {recentVideos.map(v => (
+            <Link key={v.id} href={`/media/videos/${v.id}`} className="group block overflow-hidden rounded-3xl bg-white shadow-sm transition-all hover:-translate-y-1 hover:shadow-xl">
+              <div className="aspect-[4/3] w-full bg-zinc-900 relative flex items-center justify-center">
+                {v.thumbnailUrl && <Image src={v.thumbnailUrl} alt={v.title} fill className="object-cover opacity-60 group-hover:opacity-80 transition-opacity duration-500" />}
+                <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent" />
+                <div className="relative z-10 flex h-16 w-16 items-center justify-center rounded-full bg-white/20 backdrop-blur-sm group-hover:scale-110 transition-transform">
+                  <div className="h-8 w-8 ml-1 rounded-sm bg-white" style={{ clipPath: "polygon(0 0, 0 100%, 100% 50%)" }} />
+                </div>
+                <div className="absolute bottom-4 left-4 right-4 flex justify-between text-white">
+                  <div className="flex items-center gap-2 font-bold text-sm">
+                    <span className="bg-red-600 px-2 py-0.5 rounded text-[10px] uppercase tracking-widest">Video</span>
+                  </div>
+                </div>
+              </div>
+              <div className="p-5">
+                <h3 className="font-black text-lg line-clamp-2 leading-tight">{v.title}</h3>
+              </div>
+            </Link>
+          ))}
+          {recentGalleries.map(g => (
+            <Link key={g.id} href={`/media/albums/${g.slug}`} className="group block overflow-hidden rounded-3xl bg-white shadow-sm transition-all hover:-translate-y-1 hover:shadow-xl">
+              <div className="aspect-[4/3] w-full bg-zinc-200 relative">
+                {g.images.length > 0 && <Image src={g.images[0].url} alt={g.title} fill className="object-cover transition-transform duration-500 group-hover:scale-105" />}
+                <div className="absolute inset-0 bg-gradient-to-t from-black via-transparent to-transparent" />
+                <div className="absolute bottom-4 left-4 right-4 flex items-center justify-between text-white">
+                  <div className="flex items-center gap-2 font-bold text-sm">
+                    <span className="bg-black/50 backdrop-blur px-2 py-0.5 rounded text-[10px] uppercase tracking-widest">{g.images.length} Photos</span>
+                  </div>
+                </div>
+              </div>
+              <div className="p-5">
+                <h3 className="font-black text-lg line-clamp-2 leading-tight">{g.title}</h3>
+              </div>
+            </Link>
+          ))}
+        </div>
+      </section>
+
+      {/* FKF AFFILIATION */}
+      <section className="bg-zinc-100 py-16">
+        <div className="mx-auto max-w-7xl px-5 lg:px-8 flex flex-col items-center text-center">
+          <p className="text-sm font-black uppercase tracking-[.2em] text-zinc-500 mb-6">Affiliated with</p>
+          <a href="https://footballkenya.org/" target="_blank" rel="noreferrer" className="group flex flex-col items-center hover:-translate-y-1 transition-transform">
+            <div className="h-32 w-32 relative bg-white rounded-full p-4 shadow-sm border border-black/5 group-hover:shadow-md transition-shadow">
+              <Image src="https://footballkenya.org/assets/fkf-logo-TK2nnrvJ.webp" alt="Football Kenya Federation" fill className="object-contain p-4" />
+            </div>
+            <p className="mt-4 font-black text-lg text-black">Football Kenya Federation</p>
+            <p className="text-red-600 text-sm font-bold mt-1">Visit official website →</p>
+          </a>
         </div>
       </section>
 

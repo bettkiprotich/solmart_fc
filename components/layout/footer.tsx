@@ -33,19 +33,20 @@ export async function Footer() {
     <footer className="bg-black text-white">
       {/* Sponsor Banner */}
       {(clubSponsors.length > 0 || teamSponsors.length > 0) && (
-        <div className="bg-white text-black">
+        <div className="bg-white text-black border-b border-black/5">
           <div className="mx-auto max-w-7xl px-5 py-12 lg:px-8">
             {clubSponsors.length > 0 && (
-              <div className="mb-10 text-center">
-                <h3 className="text-xs font-bold uppercase tracking-widest text-black/40 mb-6">Club Principal Partners</h3>
-                <div className="flex flex-wrap justify-center items-center gap-10 md:gap-16">
+              <div className="mb-12 text-center">
+                <h3 className="text-xs font-black uppercase tracking-widest text-black/40 mb-6">Club Principal Partners</h3>
+                <div className="flex flex-wrap justify-center items-center gap-6 md:gap-8">
                   {clubSponsors.map(s => (
-                    <Link key={s.id} href={`/sponsors/${s.id}`} className="block opacity-70 hover:opacity-100 transition-opacity">
+                    <Link key={s.id} href={s.websiteUrl || `/sponsors/${s.id}`} className="group flex flex-col items-center gap-3 bg-zinc-50 rounded-2xl p-6 border border-zinc-100 hover:border-black/20 hover:bg-zinc-100 hover:shadow-md transition-all min-w-[160px]">
                       {s.logoUrl ? (
-                        <Image src={s.logoUrl} alt={s.name} width={100} height={50} className="h-10 md:h-12 w-auto object-contain grayscale hover:grayscale-0 transition-all" />
+                        <Image src={s.logoUrl} alt={s.name} width={100} height={50} className="h-10 md:h-12 w-auto object-contain grayscale group-hover:grayscale-0 transition-all" />
                       ) : (
                         <span className="font-black text-xl">{s.name}</span>
                       )}
+                      <span className="text-[10px] font-bold uppercase tracking-widest text-red-600 opacity-0 group-hover:opacity-100 transition-opacity -mt-2">Visit Partner</span>
                     </Link>
                   ))}
                 </div>
@@ -54,15 +55,16 @@ export async function Footer() {
             
             {teamSponsors.length > 0 && (
               <div className="text-center">
-                <h3 className="text-xs font-bold uppercase tracking-widest text-black/40 mb-6">Team Sponsors</h3>
-                <div className="flex flex-wrap justify-center items-center gap-8 md:gap-12">
+                <h3 className="text-xs font-black uppercase tracking-widest text-black/40 mb-6">Team Sponsors</h3>
+                <div className="flex flex-wrap justify-center items-center gap-6 md:gap-8">
                   {teamSponsors.map(s => (
-                    <Link key={s.id} href={`/sponsors/${s.id}`} className="block opacity-50 hover:opacity-100 transition-opacity">
+                    <Link key={s.id} href={s.websiteUrl || `/sponsors/${s.id}`} className="group flex flex-col items-center gap-3 bg-zinc-50 rounded-2xl p-5 border border-zinc-100 hover:border-black/20 hover:bg-zinc-100 hover:shadow-md transition-all min-w-[140px]">
                       {s.logoUrl ? (
-                        <Image src={s.logoUrl} alt={s.name} width={80} height={40} className="h-8 w-auto object-contain grayscale hover:grayscale-0 transition-all" />
+                        <Image src={s.logoUrl} alt={s.name} width={80} height={40} className="h-8 w-auto object-contain grayscale group-hover:grayscale-0 transition-all" />
                       ) : (
                         <span className="font-bold text-lg">{s.name}</span>
                       )}
+                      <span className="text-[10px] font-bold uppercase tracking-widest text-red-600 opacity-0 group-hover:opacity-100 transition-opacity -mt-2">View Profile</span>
                     </Link>
                   ))}
                 </div>

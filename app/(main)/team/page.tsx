@@ -57,7 +57,20 @@ export default async function TeamPage() {
   if (!team) return notFound();
 
   let fullTable: any[] = [];
-  if (team.tableRows.length > 0) {
+  
+  // Find the competition that is meant to be shown on the team page
+  const featuredComp = await prisma.competition.findFirst({
+    where: { showOnTeamPage: true }
+  });
+  
+  if (featuredComp) {
+    fullTable = await prisma.leagueTable.findMany({
+      where: { competitionId: featuredComp.id },
+      include: { team: true, competition: true },
+      orderBy: { position: "asc" }
+    });
+  } else if (team.tableRows.length > 0) {
+    // Fallback if none explicitly marked but team has rows
     fullTable = await prisma.leagueTable.findMany({
       where: { competitionId: team.tableRows[0].competitionId },
       include: { team: true, competition: true },

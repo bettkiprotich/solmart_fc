@@ -43,9 +43,15 @@ export function FixtureCard({ match }: { match: any }) {
 
         <div className="flex min-w-[4rem] flex-col items-center justify-center pt-8 text-center sm:min-w-[5rem] sm:pt-10">
           <p className="text-xs font-medium text-white/60 sm:text-sm">
-            {date.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}
+            {match.status === "COMPLETED" ? "FT" : date.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}
           </p>
-          <span className="mt-2 text-3xl font-black tracking-tight sm:text-4xl">VS</span>
+          {match.status === "COMPLETED" ? (
+            <span className="mt-2 text-3xl font-black tracking-tight sm:text-4xl text-red-500">
+              {match.homeScore} - {match.awayScore}
+            </span>
+          ) : (
+            <span className="mt-2 text-3xl font-black tracking-tight sm:text-4xl">VS</span>
+          )}
           <span className="mt-2 h-1 w-8 rounded-full bg-red-600 sm:w-10" />
         </div>
 

@@ -62,13 +62,14 @@ export function TeamHub({ team, fullTable = [] }: { team: TeamData, fullTable?: 
       </div>
 
       {/* Navigation */}
-      <div className="bg-white border-b sticky top-0 z-10 shadow-sm">
+      <div className="bg-white border-b shadow-sm relative z-20">
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 overflow-x-auto hide-scrollbar">
           <div className="flex gap-8">
             {tabs.map((t) => (
               <button
                 key={t}
-                onClick={() => setTab(t)}
+                type="button"
+                onClick={(e) => { e.preventDefault(); setTab(t); }}
                 className={`py-4 text-sm font-bold uppercase tracking-wider whitespace-nowrap border-b-4 transition-colors ${tab === t ? "border-red-600 text-red-600" : "border-transparent text-black/60 hover:text-black"}`}
               >
                 {t}
