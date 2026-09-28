@@ -33,7 +33,7 @@ export default async function MediaPage() {
           Photos and videos from our latest matches, training sessions, and club events.
         </p>
 
-        <div className="columns-1 md:columns-2 lg:columns-3 gap-6 space-y-6">
+        <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
           {mediaItems.length === 0 ? (
             <p className="text-black/50">No media available yet.</p>
           ) : (
@@ -41,10 +41,10 @@ export default async function MediaPage() {
               <div key={`${item.type}-${item.id}`} className="break-inside-avoid">
                 {item.type === "GALLERY" ? (
                   <Link href={`/media/albums/${(item as any).slug}`} className="group block overflow-hidden rounded-3xl bg-white shadow-sm transition-all hover:-translate-y-1 hover:shadow-xl">
-                    <div className="aspect-[4/3] w-full bg-zinc-200 relative">
+                    <div className="aspect-[4/3] w-full bg-zinc-900 relative">
                       {/* Using the first image as cover */}
                       {(item as any).images.length > 0 ? (
-                        <Image src={(item as any).images[0].url} alt={(item as any).title} fill className="object-cover transition-transform duration-500 group-hover:scale-105" />
+                        <Image src={(item as any).images[0].url} alt={(item as any).title} fill className="object-contain p-2 transition-transform duration-500 group-hover:scale-[1.02]" />
                       ) : (
                         <div className="flex h-full w-full items-center justify-center bg-zinc-200 text-zinc-400">
                            <PhotoIcon className="h-12 w-12" />
@@ -69,7 +69,7 @@ export default async function MediaPage() {
                   <Link href={`/media/videos/${(item as any).id}`} className="group block overflow-hidden rounded-3xl bg-white shadow-sm transition-all hover:-translate-y-1 hover:shadow-xl">
                     <div className="aspect-video w-full bg-zinc-200 relative flex items-center justify-center">
                       {(item as any).thumbnailUrl ? (
-                         <Image src={(item as any).thumbnailUrl} alt={(item as any).title} fill className="object-cover transition-transform duration-500 group-hover:scale-105 opacity-80 group-hover:opacity-100" />
+                         <Image src={(item as any).thumbnailUrl} alt={(item as any).title} fill className="object-contain p-2 transition-transform duration-500 group-hover:scale-[1.02] opacity-80 group-hover:opacity-100" />
                       ) : (
                         <div className="flex h-full w-full items-center justify-center bg-zinc-900 text-zinc-700">
                            <PlayCircleIcon className="h-16 w-16" />

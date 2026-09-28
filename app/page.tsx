@@ -253,7 +253,7 @@ export default async function HomePage() {
           {recentVideos.map(v => (
             <Link key={v.id} href={`/media/videos/${v.id}`} className="group block overflow-hidden rounded-3xl bg-white shadow-sm transition-all hover:-translate-y-1 hover:shadow-xl">
               <div className="aspect-[4/3] w-full bg-zinc-900 relative flex items-center justify-center">
-                {v.thumbnailUrl && <Image src={v.thumbnailUrl} alt={v.title} fill className="object-cover opacity-60 group-hover:opacity-80 transition-opacity duration-500" />}
+                {v.thumbnailUrl && <Image src={v.thumbnailUrl} alt={v.title} fill className="object-contain p-2 opacity-80 transition-opacity duration-500 group-hover:opacity-100" />}
                 <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent" />
                 <div className="relative z-10 flex h-16 w-16 items-center justify-center rounded-full bg-white/20 backdrop-blur-sm group-hover:scale-110 transition-transform">
                   <div className="h-8 w-8 ml-1 rounded-sm bg-white" style={{ clipPath: "polygon(0 0, 0 100%, 100% 50%)" }} />
@@ -271,8 +271,8 @@ export default async function HomePage() {
           ))}
           {recentGalleries.map(g => (
             <Link key={g.id} href={`/media/albums/${g.slug}`} className="group block overflow-hidden rounded-3xl bg-white shadow-sm transition-all hover:-translate-y-1 hover:shadow-xl">
-              <div className="aspect-[4/3] w-full bg-zinc-200 relative">
-                {g.images.length > 0 && <Image src={g.images[0].url} alt={g.title} fill className="object-cover transition-transform duration-500 group-hover:scale-105" />}
+              <div className="aspect-[4/3] w-full bg-zinc-900 relative">
+                {g.images.length > 0 && <Image src={g.images[0].url} alt={g.title} fill className="object-contain p-2 transition-transform duration-500 group-hover:scale-[1.02]" />}
                 <div className="absolute inset-0 bg-gradient-to-t from-black via-transparent to-transparent" />
                 <div className="absolute bottom-4 left-4 right-4 flex items-center justify-between text-white">
                   <div className="flex items-center gap-2 font-bold text-sm">

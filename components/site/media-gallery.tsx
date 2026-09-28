@@ -17,8 +17,8 @@ export function MediaGallery({ gallery }: { gallery: any }) {
       </div>
       <div className="grid grid-cols-2 gap-2 bg-zinc-100 p-2 sm:grid-cols-4">
         {images.map((image: any, index: number) => (
-          <button key={image.id} type="button" onClick={() => setActive(index)} className={`group relative overflow-hidden rounded-xl bg-zinc-200 text-left focus:outline-none ${index === 0 ? "col-span-2 row-span-2" : "aspect-square"}`} aria-label={`Open ${image.altText || gallery.title} photo ${index + 1}`}>
-            <Image src={image.url} alt={image.altText || gallery.title} fill sizes={index === 0 ? "(max-width: 640px) 100vw, 50vw" : "25vw"} className="object-cover transition duration-500 group-hover:scale-105" />
+          <button key={image.id} type="button" onClick={() => setActive(index)} className={`group relative overflow-hidden rounded-xl bg-zinc-900 text-left focus:outline-none ${index === 0 ? "col-span-2 row-span-2" : "aspect-square"}`} aria-label={`Open ${image.altText || gallery.title} photo ${index + 1}`}>
+            <Image src={image.url} alt={image.altText || gallery.title} fill sizes={index === 0 ? "(max-width: 640px) 100vw, 50vw" : "25vw"} className="object-contain p-1 transition duration-500 group-hover:scale-[1.02]" />
             <span className="absolute inset-0 bg-black/0 transition group-hover:bg-black/15" />
           </button>
         ))}

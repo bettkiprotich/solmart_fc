@@ -299,7 +299,7 @@ export function TeamHub({ team, fullTable = [], serverTime }: { team: TeamData, 
             {team.players.map((p) => (
               <Link href={`/team/${p.slug}`} key={p.id} className="group relative block overflow-hidden rounded-3xl bg-zinc-100 shadow-sm transition-all hover:-translate-y-1 hover:shadow-xl">
                 <div className="aspect-[3/4] w-full bg-zinc-200">
-                  {p.photoUrl && <Image src={p.photoUrl} alt="" fill className="object-cover object-top transition-transform duration-500 group-hover:scale-105" />}
+                  {p.photoUrl && <Image src={p.photoUrl} alt="" fill className="object-contain object-bottom transition-transform duration-500 group-hover:scale-[1.03]" />}
                   <div className="absolute inset-0 bg-gradient-to-t from-black via-black/20 to-transparent" />
                 </div>
                 <div className="absolute bottom-0 w-full p-4 md:p-6">
