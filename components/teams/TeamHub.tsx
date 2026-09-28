@@ -318,10 +318,10 @@ export function TeamHub({ team, fullTable = [], serverTime }: { team: TeamData, 
           <div className="space-y-4 max-w-4xl mx-auto">
             {matches.filter(m => m.type === "MATCH").length === 0 ? <p className="text-black/50">No matches scheduled.</p> : matches.filter(m => m.type === "MATCH").map(m => (
               <Link href={`/matches/${m.id}`} key={m.id} className="block rounded-3xl bg-white p-6 shadow-sm ring-1 ring-black/5 hover:bg-zinc-50 transition-colors">
-                <div className="text-xs font-bold tracking-widest text-black/40 uppercase mb-4 text-center" suppressHydrationWarning>
-                  {new Date(m.kickoffAt).toLocaleDateString(undefined, { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })}
+                <div className="text-xs font-bold tracking-widest text-black/40 uppercase mb-4 text-center">
+                  <span suppressHydrationWarning>{new Date(m.kickoffAt).toLocaleDateString(undefined, { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })}</span>
                   <span className="mx-2">·</span>
-                  {m.competition?.name || "Friendly"}
+                  <span>{m.competition?.name || "Friendly"}</span>
                 </div>
                 <div className="flex items-center justify-center gap-6">
                   <div className="flex-1 flex justify-end items-center gap-4 text-sm md:text-xl font-black">
@@ -394,10 +394,10 @@ export function TeamHub({ team, fullTable = [], serverTime }: { team: TeamData, 
           <div className="space-y-4 max-w-4xl mx-auto">
             {matches.filter(m => m.matchReport).length === 0 ? <p className="text-black/50">No match reports available.</p> : matches.filter(m => m.matchReport).reverse().map(m => (
               <Link href={`/matches/${m.id}`} key={m.id} className="block rounded-3xl bg-white p-6 shadow-sm ring-1 ring-black/5 hover:bg-zinc-50 transition-colors">
-                <div className="text-xs font-bold tracking-widest text-black/40 uppercase mb-2" suppressHydrationWarning>
-                  {new Date(m.kickoffAt).toLocaleDateString(undefined, { year: 'numeric', month: 'long', day: 'numeric' })}
+                <div className="text-xs font-bold tracking-widest text-black/40 uppercase mb-2">
+                  <span suppressHydrationWarning>{new Date(m.kickoffAt).toLocaleDateString(undefined, { year: 'numeric', month: 'long', day: 'numeric' })}</span>
                   <span className="mx-2">·</span>
-                  {m.competition?.name || "Friendly"}
+                  <span>{m.competition?.name || "Friendly"}</span>
                 </div>
                 <h3 className="font-black text-xl mb-4 text-black">
                   {m.homeTeamId === team.id ? team.name : m.homeTeam.name} {m.homeScore} - {m.awayScore} {m.awayTeamId === team.id ? team.name : m.awayTeam.name}

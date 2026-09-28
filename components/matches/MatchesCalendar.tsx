@@ -96,8 +96,8 @@ export function MatchesCalendar({ initialFixtures }: { initialFixtures: FixtureW
                 {dayFixtures.map(f => (
                   <Link href={`/matches/${f.id}`} key={f.id} className={`block rounded-lg border p-2 text-xs transition-colors hover:border-black/20 ${f.type === 'TRAINING' ? 'bg-amber-50 border-amber-100' : ''}`}>
                     <div className="mb-1 font-bold text-[10px] text-black/40">
-                      {new Date(f.kickoffAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
-                      {f.type === "TRAINING" ? " · Training" : ` · ${f.competition?.name || "Friendly"}`}
+                      <span suppressHydrationWarning>{new Date(f.kickoffAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</span>
+                      <span>{f.type === "TRAINING" ? " · Training" : ` · ${f.competition?.name || "Friendly"}`}</span>
                     </div>
                     {f.type === "MATCH" ? (
                       <div className="flex items-center justify-between gap-2">
